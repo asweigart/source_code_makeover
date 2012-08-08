@@ -78,32 +78,30 @@ class Bubble2D:
     """Represents a circular object on the game map with position, radius, and velocity."""
 
     def __init__(self, radius):
-        self.position = Vector2D(0, 0)
+        self.pos = Vector2D(0, 0)
         self.radius = radius;
         self.speed = Vector2D(0, 0)
 
     def update(self, delta_t):
         """Update the bubble's position as though delta_t seconds have passed."""
-        self.position.x += self.speed.x * delta_t
-        self.position.y += self.speed.y * delta_t
+        self.pos.x += self.speed.x * delta_t
+        self.pos.y += self.speed.y * delta_t
 
     def wrap_around(self):
         """Change the position of the bubble to toroidally "wrap around" if it goes off one edge of the map."""
-        pos = self.position
-        if pos.x < 0: pos.x = 1
-        if pos.y < 0: pos.y = 1
-        if pos.x > 1: pos.x = 0
-        if pos.y > 1: pos.y = 0
+        if self.pos.x < 0: self.pos.x = 1
+        if self.pos.y < 0: self.pos.y = 1
+        if self.pos.x > 1: self.pos.x = 0
+        if self.pos.y > 1: self.pos.y = 0
 
     def is_out(self):
         """Returns True if the center of the bubble is outside the game map, False if it is on the map."""
-        pos = self.position;
-        return pos.x < 0 or pos.y < 0 or pos.x > 1 or pos.y > 1
+        return self.pos.x < 0 or self.pos.y < 0 or self.pos.x > 1 or self.pos.y > 1
 
     def collides_with(self, bubble):
         """Returns True if this bubble is intersecting with the Bubble2D object passed in for the bubble parameter."""
-        a = abs(self.position.x - bubble.position.x)
-        b = abs(self.position.y - bubble.position.y)
+        a = abs(self.pos.x - bubble.pos.x)
+        b = abs(self.pos.y - bubble.pos.y)
         distance = math.sqrt(a * a + b * b)
         return distance < (self.radius + bubble.radius)
 
@@ -125,7 +123,7 @@ def make_bubble(kind):
         speed = 0.25
 
     new_bubble = Bubble2D(size)
-    new_bubble.position = Vector2D(
+    new_bubble.pos = Vector2D(
         random_position(),
         random_position())
     new_bubble.speed = Vector2D(
@@ -162,7 +160,7 @@ class GameWorld:
         if (level > self.max_level): self.max_level = level
         if self.ship == None:
             self.ship = Bubble2D(1.0 / 25)
-        self.ship.position = Vector2D(0.5, 0.5)
+        self.ship.pos = Vector2D(0.5, 0.5)
         self.ship.speed = Vector2D(0, 0)
         self.bullet = None;
         self.move_timer = 0
@@ -223,7 +221,7 @@ class GameWorld:
                 self.death_timer -= delta_t
             elif self.lives > 0:
                 self.ship = Bubble2D(1.0 / 25)
-                self.ship.position = Vector2D(0.5, 0.5)
+                self.ship.pos = Vector2D(0.5, 0.5)
                 self.ship_shield_timer = 6;
             else:
                 self.level = 0 # Game over
@@ -280,20 +278,20 @@ class GameWorld:
             elif parent.kind == "medium":
                 new_type = "small"
             b = make_bubble(new_type)
-            b.position.copy(parent.position)
+            b.pos.copy(parent.pos)
             self.bubbles.append(b)
             b = make_bubble(new_type)
-            b.position.copy(parent.position)
+            b.pos.copy(parent.pos)
             self.bubbles.append(b)
 
     def spawn_explosion(self, bubble):
         explosion = Bubble2D(0)
-        explosion.position.copy(bubble.position)
+        explosion.pos.copy(bubble.pos)
         self.explosions.append(explosion)
 
     def spawn_powerup(self, bubble):
         powerup = Bubble2D(0.03)
-        powerup.position.copy(bubble.position)
+        powerup.pos.copy(bubble.pos)
         powerup.kind = random.choice(("shield", "bullet", "freeze"))
         powerup.age = 0
         self.powerups.append(powerup)
@@ -327,11 +325,11 @@ class GameWorld:
         if self.bullet != None or self.ship == None:
             return
 
-        x -= self.ship.position.x;
-        y -= self.ship.position.y;
+        x -= self.ship.pos.x;
+        y -= self.ship.pos.y;
 
         b = Bubble2D(0.01)
-        b.position.copy(self.ship.position);
+        b.pos.copy(self.ship.pos);
         b.speed.x = x * 3
         b.speed.y = y * 3
 
@@ -350,8 +348,8 @@ class GameWorld:
         if self.ship == None:
             return
 
-        x -= self.ship.position.x;
-        y -= self.ship.position.y;
+        x -= self.ship.pos.x;
+        y -= self.ship.pos.y;
 
         self.accel_x += x * 0.03;
         self.accel_y += y * 0.03;
@@ -456,7 +454,7 @@ class GameScreen:
             if not hasattr(bubble, "color"):
                 bubble.color = random.choice(
                     self.bubble_colors)
-            pos = bubble.position
+            pos = bubble.pos
             pygame.draw.circle(
                 self.screen,
                 bubble.color,
@@ -464,7 +462,7 @@ class GameScreen:
                 int(round(bubble.radius * MAP_SIZE)),
                 1)
         for explosion in m.explosions:
-            pos = explosion.position
+            pos = explosion.pos
             pygame.draw.circle(
                 self.screen,
                 RED,
@@ -478,7 +476,7 @@ class GameScreen:
 
     def render_ship(self):
         ship = self.model.ship
-        pos = ship.position
+        pos = ship.pos
         bbox = pygame.draw.circle(
             self.screen,
             SILVER,
@@ -495,7 +493,7 @@ class GameScreen:
 
     def render_bullet(self):
         bullet = self.model.bullet
-        pos = bullet.position
+        pos = bullet.pos
         bbox = pygame.draw.circle(
             self.screen,
             RED,
@@ -505,7 +503,7 @@ class GameScreen:
             pygame.draw.rect(self.screen, RED, bbox, 1)
 
     def render_powerup(self, powerup):
-        pos = powerup.position
+        pos = powerup.pos
         radius = powerup.radius * MAP_SIZE
         if powerup.kind    == "shield":
             bbox = pygame.draw.circle(
