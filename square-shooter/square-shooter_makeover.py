@@ -100,7 +100,7 @@ class Bubble2D:
 
     def is_out(self):
         """Returns True if the center of the bubble is outside the game map, False if it is on the map."""
-        return self.pos.x < 0 or self.pos.y < 0 or self.pos.x > 1 or self.pos.y > 1
+        return not (0 < self.pos.x < 1 and 0 < self.pos.y < 1)
 
     def collides_with(self, bubble):
         """Returns True if this bubble is intersecting with the Bubble2D object passed in for the bubble parameter."""
