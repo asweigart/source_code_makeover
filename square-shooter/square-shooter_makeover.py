@@ -153,7 +153,7 @@ class Bubble(ObjectOnMap):
             elif self.kind == "big":
                 new_kind = "medium"
 
-            for i in range(2): # creates two new Bubbles
+            for i in range(20): # creates two new Bubbles
                 spawned_bubbles.append(Bubble(new_kind))
                 spawned_bubbles[-1].pos.copy(self.pos)
 
@@ -172,6 +172,7 @@ class Ship(ObjectOnMap):
     def __init__(self):
         super(Ship, self).__init__(0.04) # all Ships are the same size.
         self._shield_timer = 0
+        self._super_bullet_timer = 0
         self.accel_x = 0 # acceleration rate of the ship
         self.accel_y = 0
 
@@ -196,9 +197,11 @@ class Ship(ObjectOnMap):
         self.speed.x *= DECELERATION
         self.speed.y *= DECELERATION
 
-        # shield degrades over time until it reaches 0.
-        if self._shield_timer > 0:
+        # shield and super bullets degrade over time until it reaches 0.
+        if self.has_shield():
             self._shield_timer -= delta_t
+        if self.has_super_bullets():
+            self._super_bullet_timer -= delta_t
 
         super(Ship, self).update(delta_t)
 
@@ -209,6 +212,19 @@ class Ship(ObjectOnMap):
     def has_shield(self):
         """Returns True if this ship currently has a shield, False if it does not have a shield."""
         return self._shield_timer > 0
+
+    def add_super_bullets(self, secs=6):
+        """Extends the time on the ship's shield by secs seconds."""
+        self._super_bullet_timer += secs
+
+    def has_super_bullets(self):
+        """Returns True if this ship currently has a shield, False if it does not have a shield."""
+        return self._super_bullet_timer > 0
+
+class Bullet(ObjectOnMap):
+    def __init__(self):
+        super(Bullet, self).__init__(0.01) # all Bullet objects are the same size
+        self.shield = False
 
 
 class GameWorld:
@@ -223,7 +239,6 @@ class GameWorld:
 
     death_timer = 0
     finish_timer = 0
-    bullet_shield_timer = 0
     freeze_timer = 0
 
     level = 0
@@ -242,7 +257,6 @@ class GameWorld:
         self.death_timer = 0
         self.finish_timer = 0
 
-        self.bullet_shield_timer = 0;
         self.freeze_timer = 0;
 
         del self.bubbles[:]
@@ -265,8 +279,7 @@ class GameWorld:
                 self.powerups.pop(0)
         for i in self.powerups:
             i.age += delta_t
-        if self.bullet_shield_timer > 0:
-            self.bullet_shield_timer -= delta_t
+
         if self.freeze_timer > 0:
             self.freeze_timer -= delta_t
 
@@ -303,7 +316,7 @@ class GameWorld:
         for b in self.bubbles:
             if self.bullet != None and b.collides_with(self.bullet):
                 self.bubbles.remove(b)
-                if self.bullet_shield_timer <= 0:
+                if not self.ship.has_super_bullets():
                     self.bullet = None
                 else:
                     # Push it along or it will just
@@ -355,7 +368,7 @@ class GameWorld:
         if powerup.kind == "shield":
             self.ship.add_shield()
         elif powerup.kind == "bullet":
-            self.bullet_shield_timer += 6
+            self.ship.add_super_bullets()
         elif powerup.kind == "freeze":
             self.freeze_timer += 6
         else:
@@ -523,7 +536,7 @@ class GameScreen:
             RED,
             scale_and_round(pos.x, pos.y),
             int(round(bullet.radius * MAP_SIZE)))
-        if self.model.bullet_shield_timer > 0:
+        if self.model.ship.has_super_bullets():
             pygame.draw.rect(self.screen, RED, bbox, 1)
 
     def render_powerup(self, powerup):
