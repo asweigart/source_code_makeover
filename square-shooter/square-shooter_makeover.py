@@ -385,19 +385,19 @@ class GameScreen:
         if m.level == 0:
             self.render_title_screen()
             # Hide the [P]ause text.
-            self.screen.fill(GREEN, (500, 424, 140, 24))
+            self.screen.fill(GREEN, (MAP_WIDTH + 20, 424, 140, 24))
         else:
             self.render_game_world()
             # Hide the [P]lay text.
-            self.screen.fill(GREEN, (500, 400, 140, 24))
+            self.screen.fill(GREEN, (MAP_WIDTH + 20, 400, 140, 24))
             if self.game_paused: self.render_pause_text()
 
         text = self.hud_font.render(str(m.level), False, BLACK)
-        self.screen.blit(text, (500, 48))
+        self.screen.blit(text, (MAP_WIDTH + 20, 48))
         text = self.hud_font.render(str(m.lives), False, BLACK)
-        self.screen.blit(text, (500, 48 * 3))
+        self.screen.blit(text, (MAP_WIDTH + 20, 48 * 3))
         text = self.hud_font.render(str(m.score), False, BLACK)
-        self.screen.blit(text, (500, 48 * 5))
+        self.screen.blit(text, (MAP_WIDTH + 20, 48 * 5))
 
         #fps_text = self.msg_font.render(str(self.fps), False, GREEN)
         #self.screen.blit(fps_text, (0, 0))
@@ -406,17 +406,17 @@ class GameScreen:
 
     def render_backround(self):
         self.bglayer.fill(BLACK)
-        self.bglayer.fill(GREEN, (MAP_WIDTH, 0, 160, MAP_HEIGHT))
+        self.bglayer.fill(GREEN, (MAP_WIDTH, 0, WINDOW_WIDTH - MAP_WIDTH, MAP_HEIGHT))
 
         msg = ["Level", "Lives", "Score"]
         for i in range(3):
             text = self.hud_font.render(msg[i], False, BLACK)
-            self.bglayer.blit(text, (500, i * 96))
+            self.bglayer.blit(text, (MAP_WIDTH + 20, i * 96))
 
         msg = ["[Q]uit", "[P]ause", "[P]lay"]
         for i in range(3):
             text = self.msg_font.render(msg[i], False, WHITE)
-            self.bglayer.blit(text, (500, 448 - i * 24))
+            self.bglayer.blit(text, (MAP_WIDTH + 20, 448 - i * 24))
 
     def render_title_screen(self):
         text = self.hud_font.render("SQUARE", False, GREEN)
