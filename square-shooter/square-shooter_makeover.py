@@ -48,6 +48,7 @@ MAP_QUARTER_HEIGHT       = int(MAP_HEIGHT / 4.0)
 MAP_HALF_HEIGHT          = int(MAP_HEIGHT / 2.0)
 MAP_THREE_QUARTER_HEIGHT = int(3 * MAP_HEIGHT / 4.0)
 
+DECELERATION = 0.99
 
 def scale_and_round(x, y):
     """Returns x and y coordinates from 0.0 to 1.0 scaled to 0 to MAP_WIDTH or MAP_HEIGHT."""
@@ -78,12 +79,12 @@ class ObjectOnMap(object):
     """Represents a circular object on the game map with position, radius, and velocity."""
 
     def __init__(self, radius):
-        self.pos = Vector2D(0, 0)
+        self.pos = Vector2D(0.5, 0.5)
         self.radius = radius;
         self.speed = Vector2D(0, 0)
 
     def update(self, delta_t):
-        """Update the bubble's position as though delta_t seconds have passed."""
+        """Update the object's position as though delta_t seconds have passed."""
         self.pos.x += self.speed.x * delta_t
         self.pos.y += self.speed.y * delta_t
 
@@ -167,6 +168,35 @@ class Powerup(ObjectOnMap):
         self.age = 0
 
 
+class Ship(ObjectOnMap):
+    def __init__(self):
+        super(Ship, self).__init__(0.04) # all Ships are the same size.
+        self.shield_timer = 0
+        self.accel_x = 0 # acceleration rate of the ship
+        self.accel_y = 0
+
+    def thrust_at(self, x, y):
+        """Increase acceleration of the ship in the direction of x, y.
+        The further away x, y is from the current position of the ship, the larger the acceleration increase."""
+        x -= self.pos.x;
+        y -= self.pos.y;
+
+        self.accel_x += x * 0.03;
+        self.accel_y += y * 0.03;
+
+    def stop_thrust(self):
+        """Immediately stop all ship acceleration. Note that this doesn't stop the velocity of the ship, just the acceleration."""
+        self.accel_x = 0
+        self.accel_y = 0
+
+    def update(self, delta_t):
+        """Update the ship's position as though delta_t seconds have passed."""
+        self.speed.x += self.accel_x
+        self.speed.y += self.accel_y
+        self.speed.x *= DECELERATION
+        self.speed.y *= DECELERATION
+        super(Ship, self).update(delta_t)
+
 class GameWorld:
     bubbles = []
     explosions = []
@@ -177,10 +207,8 @@ class GameWorld:
     accel_x = 0
     accel_y = 0
 
-    move_timer = 0
     death_timer = 0
     finish_timer = 0
-    ship_shield_timer = 0
     bullet_shield_timer = 0
     freeze_timer = 0
 
@@ -194,15 +222,12 @@ class GameWorld:
         self.level = level
         if (level > self.max_level): self.max_level = level
         if self.ship == None:
-            self.ship = ObjectOnMap(1.0 / 25)
-        self.ship.pos = Vector2D(0.5, 0.5)
-        self.ship.speed = Vector2D(0, 0)
+            self.ship = Ship()
+        self.ship.shield_timer += 6 # add 6 seconds of shield at the start of a level
         self.bullet = None;
-        self.move_timer = 0
         self.death_timer = 0
         self.finish_timer = 0
 
-        self.ship_shield_timer = 6;
         self.bullet_shield_timer = 0;
         self.freeze_timer = 0;
 
@@ -226,8 +251,8 @@ class GameWorld:
                 self.powerups.pop(0)
         for i in self.powerups:
             i.age += delta_t
-        if self.ship_shield_timer > 0:
-            self.ship_shield_timer -= delta_t
+        if (self.ship != None) and (self.ship.shield_timer > 0):
+            self.ship.shield_timer -= delta_t
         if self.bullet_shield_timer > 0:
             self.bullet_shield_timer -= delta_t
         if self.freeze_timer > 0:
@@ -254,17 +279,12 @@ class GameWorld:
             if self.death_timer > 0:
                 self.death_timer -= delta_t
             elif self.lives > 0:
-                self.ship = ObjectOnMap(1.0 / 25)
-                self.ship.pos = Vector2D(0.5, 0.5)
-                self.ship_shield_timer = 6;
+                self.ship = Ship()
+                self.ship.shield_timer += 6 # add 6 seconds of shield at the start of a life
             else:
                 self.level = 0 # Game over
             return
 
-        self.ship.speed.x += self.accel_x
-        self.ship.speed.y += self.accel_y
-        self.ship.speed.x *= 0.99
-        self.ship.speed.y *= 0.99
         self.ship.update(delta_t)
 
     def handle_collisions(self, delta_t):
@@ -288,7 +308,7 @@ class GameWorld:
             elif self.ship != None:
                 if not b.collides_with(self.ship):
                     continue
-                if self.ship_shield_timer > 0:
+                if self.ship.shield_timer > 0:
                     continue
                 self.spawn_explosion(self.ship)
                 self.ship = None
@@ -321,7 +341,7 @@ class GameWorld:
 
     def apply_powerup(self, powerup):
         if powerup.kind == "shield":
-            self.ship_shield_timer += 6
+            self.ship.shield_timer += 6
         elif powerup.kind == "bullet":
             self.bullet_shield_timer += 6
         elif powerup.kind == "freeze":
@@ -356,19 +376,6 @@ class GameWorld:
 
         self.bullet = b
 
-    def thrust_at(self, x, y):
-        if self.ship == None:
-            return
-
-        x -= self.ship.pos.x;
-        y -= self.ship.pos.y;
-
-        self.accel_x += x * 0.03;
-        self.accel_y += y * 0.03;
-
-    def stop_thrust(self):
-        self.accel_x = 0
-        self.accel_y = 0
 
 class GameScreen:
     def __init__(self, model, screen):
@@ -493,7 +500,7 @@ class GameScreen:
             scale_and_round(pos.x, pos.y),
             int(round(ship.radius * 0.5 * MAP_SIZE)),
             1)
-        if self.model.ship_shield_timer > 0:
+        if self.model.ship.shield_timer > 0:
             pygame.draw.rect(self.screen, SILVER, bbox, 1)
 
     def render_bullet(self):
@@ -579,13 +586,15 @@ while running:
             else:
                 renderer.game_paused = not renderer.game_paused
     elif ev.type == pygame.MOUSEBUTTONDOWN:
-        if model.level > 0 and not renderer.game_paused:
+        # on mouse down, fire a bullet and start the thruster of the ship
+        if (model.level > 0) and (model.ship != None) and (not renderer.game_paused):
             x, y = ev.pos
             model.shoot_at(x / float(MAP_WIDTH), y / float(MAP_HEIGHT))
-            model.thrust_at(x / float(MAP_WIDTH), y / float(MAP_HEIGHT))
+            model.ship.thrust_at(x / float(MAP_WIDTH), y / float(MAP_HEIGHT))
     elif ev.type == pygame.MOUSEBUTTONUP:
-        if model.level > 0:
-            model.stop_thrust()
+        # on mouse up, stop accelerating the ship
+        if (model.level > 0) and (model.ship != None):
+            model.ship.stop_thrust()
 
     # Simulations need the time in seconds, dammit!
     if model.level > 0 and not renderer.game_paused:
