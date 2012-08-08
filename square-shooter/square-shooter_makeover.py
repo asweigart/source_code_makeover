@@ -50,6 +50,7 @@ MAP_THREE_QUARTER_HEIGHT = int(3 * MAP_HEIGHT / 4.0)
 
 
 def scale_and_round(x, y):
+    """Returns x and y coordinates from 0.0 to 1.0 scaled to 0 to MAP_WIDTH or MAP_HEIGHT."""
 	return int(round(x * MAP_WIDTH)), int(round(y * MAP_HEIGHT))
 
 
