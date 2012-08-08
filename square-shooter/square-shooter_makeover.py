@@ -102,12 +102,12 @@ class Bubble2D:
         """Returns True if the center of the bubble is outside the game map, False if it is on the map."""
         return not (0 < self.pos.x < 1 and 0 < self.pos.y < 1)
 
-    def collides_with(self, bubble):
-        """Returns True if this bubble is intersecting with the Bubble2D object passed in for the bubble parameter."""
-        a = abs(self.pos.x - bubble.pos.x)
-        b = abs(self.pos.y - bubble.pos.y)
+    def collides_with(self, other):
+        """Returns True if this bubble is intersecting with the Bubble2D object passed in for the "other" parameter."""
+        a = self.pos.x - other.pos.x
+        b = self.pos.y - other.pos.y
         distance = math.sqrt(a * a + b * b)
-        return distance < (self.radius + bubble.radius)
+        return distance < (self.radius + other.radius)
 
 def random_position():
     return (random.random() - 0.5) * 3 + 0.5;
