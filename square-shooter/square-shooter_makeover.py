@@ -109,11 +109,18 @@ class Bubble2D:
         distance = math.sqrt(a * a + b * b)
         return distance < (self.radius + other.radius)
 
+
 def random_position():
-    return (random.random() - 0.5) * 3 + 0.5;
+    """Returns a random float value that will be near the edge of the map"""
+    if random.randint(0, 1) == 0:
+        return random.uniform(0.0, 0.25)
+    else:
+        return random.uniform(0.75, 1.0)
 
 def random_speed(magnitude):
-    return (random.random() * magnitude * 2 - magnitude)
+    """Returns a random float value between -magnitude and magnitude."""
+    return random.uniform(-magnitude, magnitude)
+
 
 def make_bubble(kind):
     if kind == "big":
