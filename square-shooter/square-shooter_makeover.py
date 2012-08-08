@@ -26,13 +26,12 @@ import math
 import random
 import pygame
 
-BLACK = (0, 0, 0)
-GREEN = (0, 204, 0)
-RED = (255, 0, 0)
+BLACK  = (  0,   0,   0)
+GREEN  = (  0, 204,   0)
+RED    = (255,   0,   0)
 SILVER = (204, 204, 204)
-WHITE = (255, 255, 255)
+WHITE  = (255, 255, 255)
 
-powerup_types = ["shield", "bullet", "freeze"]
 
 def scale_and_round(x, y):
 	x = int(round(x * 480))
@@ -134,8 +133,6 @@ class GameWorld:
 	max_level = 0
 	high_score = 0
 	lives = 0
-
-	powerup_types = ["shield", "bullet", "freeze"]
 
 	def init_level(self, level):
 		self.level = level
@@ -274,7 +271,7 @@ class GameWorld:
 	def spawn_powerup(self, bubble):
 		powerup = Bubble2D(0.03)
 		powerup.position.copy(bubble.position)
-		powerup.kind = random.choice(powerup_types)
+		powerup.kind = random.choice(("shield", "bullet", "freeze"))
 		powerup.age = 0
 		self.powerups.append(powerup)
 
