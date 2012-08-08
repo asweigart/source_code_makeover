@@ -198,13 +198,10 @@ class Ship(ObjectOnMap):
         self.speed.x *= DECELERATION
         self.speed.y *= DECELERATION
 
-        # shield and super bullets degrade over time until it reaches 0.
-        if self.has_shield():
-            self._shield_timer -= delta_t
-        if self.has_super_bullets():
-            self._super_bullet_timer -= delta_t
-        if self.has_freeze():
-            self._freeze_timer -= delta_t
+        # powerups degrade over time until it reaches 0.
+        if self.has_shield():        self._shield_timer       -= delta_t
+        if self.has_super_bullets(): self._super_bullet_timer -= delta_t
+        if self.has_freeze():        self._freeze_timer       -= delta_t
 
         super(Ship, self).update(delta_t)
 
@@ -265,8 +262,8 @@ class GameWorld:
     bullet = None
     ship = None
 
-    death_timer = 0
-    finish_timer = 0
+    afterdeath_timer = 0
+    afterfinish_timer = 0
 
     level = 0
     score = 0
@@ -276,17 +273,25 @@ class GameWorld:
 
     def init_level(self, level):
         self.level = level
-        if (level > self.max_level): self.max_level = level
+
+        # update the "max level" top score if needed
+        if (level > self.max_level):
+            self.max_level = level
+
         if self.ship == None:
             self.ship = Ship()
         self.ship.add_shield() # add shield at the start of a level
         self.bullet = None;
-        self.death_timer = 0
-        self.finish_timer = 0
 
+        self.afterdeath_timer = 0
+        self.afterfinish_timer = 0
+
+        # clear out the bubbles, explosions, and power ups from the last level.
         del self.bubbles[:]
         del self.explosions[:]
         del self.powerups[:]
+
+        # create a number of starting big bubbles as the level number.
         for i in range(level):
             self.bubbles.append(Bubble("big"))
 
@@ -306,8 +311,8 @@ class GameWorld:
             i.age += delta_t
 
         if len(self.bubbles) == 0:
-            if self.finish_timer > 0:
-                self.finish_timer -= delta_t;
+            if self.afterfinish_timer > 0:
+                self.afterfinish_timer -= delta_t;
             else:
                 self.level += 1
                 self.lives += 1
@@ -323,8 +328,8 @@ class GameWorld:
                 self.bullet = None
 
         if self.ship == None:
-            if self.death_timer > 0:
-                self.death_timer -= delta_t
+            if self.afterdeath_timer > 0:
+                self.afterdeath_timer -= delta_t
             elif self.lives > 0:
                 self.ship = Ship()
                 self.ship.add_shield() # add shields at the start of a life
@@ -350,7 +355,7 @@ class GameWorld:
                 self.spawn_explosion(b)
                 self.mark_score(b)
                 if len(self.bubbles) == 0:
-                    self.finish_timer = 3
+                    self.afterfinish_timer = 3
                 break
             elif self.ship != None:
                 if not b.collides_with(self.ship):
@@ -360,7 +365,7 @@ class GameWorld:
                 self.spawn_explosion(self.ship)
                 self.ship = None
                 self.lives -= 1
-                self.death_timer = 3;
+                self.afterdeath_timer = 3;
                 break
 
         if self.ship == None: return
@@ -402,8 +407,8 @@ class GameWorld:
 
 
 class GameScreen:
-    def __init__(self, model, screen):
-        self.model = model
+    def __init__(self, world, screen):
+        self.world = world
 
         self.screen = screen
         self.width, self.height = screen.get_size()
@@ -422,7 +427,7 @@ class GameScreen:
         self.render_backround()
 
     def render(self):
-        m = self.model
+        m = self.world
 
         self.screen.blit(self.bglayer, (0, 0))
 
@@ -473,16 +478,16 @@ class GameScreen:
         text = self.msg_font.render("presents", False, GREEN)
         self.screen.blit(text, text.get_rect(midtop = (MAP_HALF_WIDTH, MAP_QUARTER_HEIGHT)))
 
-        high_score = "High score: " + str(self.model.high_score)
+        high_score = "High score: " + str(self.world.high_score)
         text = self.msg_font.render(high_score, False, GREEN)
         self.screen.blit(text, text.get_rect(midbottom = (MAP_HALF_WIDTH, MAP_THREE_QUARTER_HEIGHT)))
 
-        max_level = "Max level: " + str(self.model.max_level)
+        max_level = "Max level: " + str(self.world.max_level)
         text = self.msg_font.render(max_level, False, GREEN)
         self.screen.blit(text, text.get_rect(midtop = (MAP_HALF_WIDTH, MAP_THREE_QUARTER_HEIGHT)))
 
     def render_game_world(self):
-        m = self.model
+        m = self.world
 
         self.screen.set_clip((0, 0, MAP_WIDTH, MAP_HEIGHT))
 
@@ -511,7 +516,7 @@ class GameScreen:
         self.screen.set_clip(None)
 
     def render_ship(self):
-        ship = self.model.ship
+        ship = self.world.ship
         pos = ship.pos
         bbox = pygame.draw.circle(
             self.screen,
@@ -524,18 +529,18 @@ class GameScreen:
             scale_and_round(pos.x, pos.y),
             int(round(ship.radius * 0.5 * MAP_SIZE)),
             1)
-        if self.model.ship.has_shield():
+        if self.world.ship.has_shield():
             pygame.draw.rect(self.screen, SILVER, bbox, 1)
 
     def render_bullet(self):
-        bullet = self.model.bullet
+        bullet = self.world.bullet
         pos = bullet.pos
         bbox = pygame.draw.circle(
             self.screen,
             RED,
             scale_and_round(pos.x, pos.y),
             int(round(bullet.radius * MAP_SIZE)))
-        if self.model.ship.has_super_bullets():
+        if self.world.ship.has_super_bullets():
             pygame.draw.rect(self.screen, RED, bbox, 1)
 
     def render_powerup(self, powerup):
@@ -580,8 +585,8 @@ pygame.init()
 
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 clock = pygame.time.Clock()
-model = GameWorld()
-renderer = GameScreen(model, screen)
+world = GameWorld()
+renderer = GameScreen(world, screen)
 
 pygame.display.set_caption("Square Shooter Desktop Edition")
 pygame.event.set_blocked(pygame.MOUSEMOTION)
@@ -598,30 +603,30 @@ while running:
         if ev.key == pygame.K_ESCAPE:
             running = False
         elif ev.key == pygame.K_q:
-            if model.level > 0:
-                model.level = 0
+            if world.level > 0:
+                world.level = 0
             else:
                 running = False
         elif ev.key == pygame.K_p:
-            if model.level == 0:
-                model.score = 0
-                model.lives = 1
-                model.init_level(1)
+            if world.level == 0:
+                world.score = 0
+                world.lives = 1
+                world.init_level(1)
             else:
                 renderer.game_paused = not renderer.game_paused
     elif ev.type == pygame.MOUSEBUTTONDOWN:
         # on mouse down, fire a bullet and start the thruster of the ship
-        if (model.level > 0) and (model.ship != None) and (not renderer.game_paused):
+        if (world.level > 0) and (world.ship != None) and (not renderer.game_paused):
             x, y = ev.pos
-            if model.bullet == None:
-                model.bullet = model.ship.shoot_at(x / float(MAP_WIDTH), y / float(MAP_HEIGHT))[0]
-            model.ship.thrust_at(x / float(MAP_WIDTH), y / float(MAP_HEIGHT))
+            if world.bullet == None:
+                world.bullet = world.ship.shoot_at(x / float(MAP_WIDTH), y / float(MAP_HEIGHT))[0]
+            world.ship.thrust_at(x / float(MAP_WIDTH), y / float(MAP_HEIGHT))
     elif ev.type == pygame.MOUSEBUTTONUP:
         # on mouse up, stop accelerating the ship
-        if (model.level > 0) and (model.ship != None):
-            model.ship.stop_thrust()
+        if (world.level > 0) and (world.ship != None):
+            world.ship.stop_thrust()
 
     # Simulations need the time in seconds, dammit!
-    if model.level > 0 and not renderer.game_paused:
-        model.update(delta_t * 0.001)
+    if world.level > 0 and not renderer.game_paused:
+        world.update(delta_t * 0.001)
     renderer.render()
