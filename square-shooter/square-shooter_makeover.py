@@ -273,6 +273,7 @@ class GameWorld:
     high_score = 0
     lives = 0
 
+
     def init_level(self, level):
         self.level = level
 
@@ -288,14 +289,12 @@ class GameWorld:
         self.afterdeath_timer = 0
         self.afterfinish_timer = 0
 
-        # clear out the bubbles, explosions, and power ups from the last level.
-        del self.bubbles[:]
-        del self.explosions[:]
-        del self.powerups[:]
+        # clear out the explosions, and power ups from the last level.
+        self.explosions = []
+        self.powerups   = []
 
         # create a number of starting big bubbles as the level number.
-        for i in range(level):
-            self.bubbles.append(Bubble("big"))
+        self.bubbles = [Bubble("big") for i in range(level)]
 
     def update(self, delta_t):
         self.handle_collisions(delta_t)
