@@ -48,7 +48,9 @@ MAP_QUARTER_HEIGHT       = int(MAP_HEIGHT / 4.0)
 MAP_HALF_HEIGHT          = int(MAP_HEIGHT / 2.0)
 MAP_THREE_QUARTER_HEIGHT = int(3 * MAP_HEIGHT / 4.0)
 
-DECELERATION = 0.99
+DECELERATION = 0.99 # set between 0.0 and 1.0
+MAX_EXPLOSION_SIZE = 0.5 # set between 0.0 and 1.0
+MAX_POWERUP_AGE = 9 # in seconds
 
 def scale_and_round(x, y):
     """Returns x and y coordinates from 0.0 to 1.0 scaled to 0 to MAP_WIDTH or MAP_HEIGHT."""
@@ -299,21 +301,21 @@ class GameWorld:
         self.handle_collisions(delta_t)
 
         # expand the explosions and delete them once they get too big
-        if len(self.explosions) > 0:
-            if self.explosions[0].radius > 0.5:
-                self.explosions.pop(0)
         for i in self.explosions:
             i.radius += delta_t
+        for i in range(len(self.explosions) - 1, -1, -1):
+            if self.explosions[i].radius > MAX_EXPLOSION_SIZE:
+                self.explosions.pop(i)
 
         # "age" the powerups on the map, and delete them if they get too old
-        if len(self.powerups) > 0:
-            if self.powerups[0].age > 9:
-                self.powerups.pop(0)
         for i in self.powerups:
             i.age += delta_t
+        for i in range(len(self.powerups) - 1, -1, -1):
+            if self.powerups[i].age > MAX_POWERUP_AGE:
+                self.powerups.pop(i)
 
         # check if all the bubbles have been destroyed
-        if len(self.bubbles) == 0:
+        if not len(self.bubbles):
             if self.afterfinish_timer > 0:
                 # the afterfinish timer is still counting down
                 self.afterfinish_timer -= delta_t;
@@ -325,8 +327,8 @@ class GameWorld:
                 return
         elif not self.ship.has_freeze():
             # update all the bubbles
-            for i in self.bubbles:
-                i.update(delta_t)
+            for bubble in self.bubbles:
+                bubble.update(delta_t)
 
         # update the bullet
         if self.bullet != None:
@@ -348,8 +350,8 @@ class GameWorld:
                 # player has run out of lives, level 0 will make the start screen display
                 self.level = 0 # Game over
             return
-
-        self.ship.update(delta_t)
+        else:
+            self.ship.update(delta_t)
 
     def handle_collisions(self, delta_t):
         for b in self.bubbles:
