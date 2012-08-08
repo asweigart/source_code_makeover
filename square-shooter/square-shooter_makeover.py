@@ -137,20 +137,22 @@ class Bubble(ObjectOnMap):
         self.color = random.choice(Bubble.colors)
 
     def spawn(self):
-        spawned_bubbles = []
-        spawned_powerups = []
+        """Returns a list of created Bubble and Powerup objects that result when this Bubble is hit. These new objects' positions are the same as this Bubble's position."""
+        spawned_bubbles = []  # the newly created Bubble object(s)
+        spawned_powerups = [] # the newly created Powerup object(s)
 
         if self.kind == "small":
+            # Small Bubbles do not create new Bubbles, but might create Powerups.
             if random.random() < 0.25:
                 spawned_powerups.append(Powerup(self.pos))
         else:
-            print(self.kind)
+            # Medium and Big Bubbles create new Bubble objects of the next smaller size. They don't create Powerups.
             if self.kind == "medium":
                 new_kind = "small"
             elif self.kind == "big":
                 new_kind = "medium"
 
-            for i in range(2):
+            for i in range(2): # creates two new Bubbles
                 spawned_bubbles.append(Bubble(new_kind))
                 spawned_bubbles[-1].pos.copy(self.pos)
 
@@ -159,7 +161,7 @@ class Bubble(ObjectOnMap):
 
 class Powerup(ObjectOnMap):
     def __init__(self, pos):
-        super(Powerup, self).__init__(0.03)
+        super(Powerup, self).__init__(0.03) # all Powerups are the same size.
         self.pos.copy(pos)
         self.kind = random.choice(("shield", "bullet", "freeze"))
         self.age = 0
