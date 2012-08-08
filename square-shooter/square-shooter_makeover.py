@@ -87,12 +87,16 @@ class Bubble2D:
         self.pos.x += self.speed.x * delta_t
         self.pos.y += self.speed.y * delta_t
 
+        wrapped = self.is_out()
+        self.wrap_around()
+        return wrapped
+
     def wrap_around(self):
         """Change the position of the bubble to toroidally "wrap around" if it goes off one edge of the map."""
-        if self.pos.x < 0: self.pos.x = 1
-        if self.pos.y < 0: self.pos.y = 1
-        if self.pos.x > 1: self.pos.x = 0
-        if self.pos.y > 1: self.pos.y = 0
+        if self.pos.x < 0: self.pos.x += 1
+        if self.pos.y < 0: self.pos.y += 1
+        if self.pos.x > 1: self.pos.x -= 1
+        if self.pos.y > 1: self.pos.y -= 1
 
     def is_out(self):
         """Returns True if the center of the bubble is outside the game map, False if it is on the map."""
@@ -209,11 +213,10 @@ class GameWorld:
         elif self.freeze_timer <= 0:
             for i in self.bubbles:
                 i.update(delta_t)
-                i.wrap_around()
 
         if self.bullet != None:
-            self.bullet.update(delta_t)
-            if self.bullet.is_out():
+            bullet_wrapped = self.bullet.update(delta_t)
+            if bullet_wrapped:
                 self.bullet = None
 
         if self.ship == None:
@@ -232,7 +235,6 @@ class GameWorld:
         self.ship.speed.x *= 0.99
         self.ship.speed.y *= 0.99
         self.ship.update(delta_t)
-        self.ship.wrap_around()
 
     def handle_collisions(self, delta_t):
         for b in self.bubbles:
