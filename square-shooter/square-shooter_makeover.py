@@ -73,17 +73,22 @@ class Vector2D:
         self.x = vector.x
         self.y = vector.y
 
+
 class Bubble2D:
+    """Represents a circular object on the game map with position, radius, and velocity."""
+
     def __init__(self, radius):
         self.position = Vector2D(0, 0)
         self.radius = radius;
         self.speed = Vector2D(0, 0)
 
     def update(self, delta_t):
+        """Update the bubble's position as though delta_t seconds have passed."""
         self.position.x += self.speed.x * delta_t
         self.position.y += self.speed.y * delta_t
 
     def wrap_around(self):
+        """Change the position of the bubble to toroidally "wrap around" if it goes off one edge of the map."""
         pos = self.position
         if pos.x < 0: pos.x = 1
         if pos.y < 0: pos.y = 1
@@ -91,10 +96,12 @@ class Bubble2D:
         if pos.y > 1: pos.y = 0
 
     def is_out(self):
+        """Returns True if the center of the bubble is outside the game map, False if it is on the map."""
         pos = self.position;
         return pos.x < 0 or pos.y < 0 or pos.x > 1 or pos.y > 1
 
     def collides_with(self, bubble):
+        """Returns True if this bubble is intersecting with the Bubble2D object passed in for the bubble parameter."""
         a = abs(self.position.x - bubble.position.x)
         b = abs(self.position.y - bubble.position.y)
         distance = math.sqrt(a * a + b * b)
