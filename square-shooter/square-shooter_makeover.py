@@ -74,7 +74,7 @@ class Vector2D:
         self.y = vector.y
 
 
-class ObjectOnMap:
+class ObjectOnMap(object):
     """Represents a circular object on the game map with position, radius, and velocity."""
 
     def __init__(self, radius):
@@ -110,31 +110,60 @@ class ObjectOnMap:
         return distance < (self.radius + other.radius)
 
 
-def random_position():
-    """Returns a random float value that will be near the edge of the map"""
-    if random.randint(0, 1) == 0:
-        return random.uniform(0.0, 0.25)
-    else:
-        return random.uniform(0.75, 1.0)
-
-
-def bubble_factory(kind):
+class Bubble(ObjectOnMap):
     #                   (size, speed)
     kinds  = {'big':    (0.1,   0.1),
               'medium': (0.075, 0.15),
               'small':  (0.05,  0.25)}
 
-    size, speed = kinds[kind]
+    colors = [pygame.Color('#ffffcc'),
+              pygame.Color('#ffccff'),
+              pygame.Color('#ccffff'),
+              pygame.Color('#ffdddd'),
+              pygame.Color('#ddffdd'),
+              pygame.Color('#ddddff')]
 
-    new_bubble = ObjectOnMap(size)
-    new_bubble.pos = Vector2D(
-        random_position(),
-        random_position())
-    new_bubble.speed = Vector2D(
-        random.uniform(-speed, speed),
-        random.uniform(-speed, speed))
-    new_bubble.kind = kind
-    return new_bubble
+    def __init__(self, kind):
+        size, speed = Bubble.kinds[kind]
+        super(Bubble ,self).__init__(size)
+
+        self.pos = Vector2D(
+            random.random(),
+            random.random())
+        self.speed = Vector2D(
+            random.uniform(-speed, speed),
+            random.uniform(-speed, speed))
+        self.kind = kind
+        self.color = random.choice(Bubble.colors)
+
+    def spawn(self):
+        spawned_bubbles = []
+        spawned_powerups = []
+
+        if self.kind == "small":
+            if random.random() < 0.25:
+                spawned_powerups.append(Powerup(self.pos))
+        else:
+            print(self.kind)
+            if self.kind == "medium":
+                new_kind = "small"
+            elif self.kind == "big":
+                new_kind = "medium"
+
+            for i in range(2):
+                spawned_bubbles.append(Bubble(new_kind))
+                spawned_bubbles[-1].pos.copy(self.pos)
+
+        return (spawned_bubbles, spawned_powerups)
+
+
+class Powerup(ObjectOnMap):
+    def __init__(self, pos):
+        super(Powerup, self).__init__(0.03)
+        self.pos.copy(pos)
+        self.kind = random.choice(("shield", "bullet", "freeze"))
+        self.age = 0
+
 
 class GameWorld:
     bubbles = []
@@ -179,7 +208,7 @@ class GameWorld:
         del self.explosions[:]
         del self.powerups[:]
         for i in range(level):
-            self.bubbles.append(bubble_factory("big"))
+            self.bubbles.append(Bubble("big"))
 
     def update(self, delta_t):
         self.handle_collisions(delta_t)
@@ -246,7 +275,9 @@ class GameWorld:
                     # Push it along or it will just
                     # destroy the newly formed bubbles.
                     self.bullet.update(delta_t * 5)
-                self.spawn_bubbles(b)
+                spawned_bubbles, spawned_powerups = b.spawn()
+                self.bubbles.extend(spawned_bubbles)
+                self.powerups.extend(spawned_powerups)
                 self.spawn_explosion(b)
                 self.mark_score(b)
                 if len(self.bubbles) == 0:
@@ -270,33 +301,10 @@ class GameWorld:
                 self.apply_powerup(p)
                 self.powerups.remove(p)
 
-    def spawn_bubbles(self, parent):
-        if parent.kind == "small":
-            if random.random() < 0.25:
-                self.spawn_powerup(parent)
-        else:
-            if parent.kind == "big":
-                new_type = "medium"
-            elif parent.kind == "medium":
-                new_type = "small"
-            b = bubble_factory(new_type)
-            b.pos.copy(parent.pos)
-            self.bubbles.append(b)
-            b = bubble_factory(new_type)
-            b.pos.copy(parent.pos)
-            self.bubbles.append(b)
-
     def spawn_explosion(self, bubble):
         explosion = ObjectOnMap(0)
         explosion.pos.copy(bubble.pos)
         self.explosions.append(explosion)
-
-    def spawn_powerup(self, bubble):
-        powerup = ObjectOnMap(0.03)
-        powerup.pos.copy(bubble.pos)
-        powerup.kind = random.choice(("shield", "bullet", "freeze"))
-        powerup.age = 0
-        self.powerups.append(powerup)
 
     def mark_score(self, bubble):
         if bubble.kind == "small":
@@ -374,11 +382,7 @@ class GameScreen:
         self.msg_font = pygame.font.SysFont(
             font_name, self.height / 20)
 
-        self.bubble_colors = ["#ffffcc", "#ffccff", "#ccffff",
-            "#ffdddd", "#ddffdd", "#ddddff"]
-        for i in range(6):
-            self.bubble_colors[i] = pygame.Color(
-                self.bubble_colors[i])
+
 
         self.game_paused = False
 
@@ -453,9 +457,6 @@ class GameScreen:
         if m.bullet != None: self.render_bullet()
 
         for bubble in m.bubbles:
-            if not hasattr(bubble, "color"):
-                bubble.color = random.choice(
-                    self.bubble_colors)
             pos = bubble.pos
             pygame.draw.circle(
                 self.screen,
