@@ -298,42 +298,54 @@ class GameWorld:
     def update(self, delta_t):
         self.handle_collisions(delta_t)
 
+        # expand the explosions and delete them once they get too big
         if len(self.explosions) > 0:
             if self.explosions[0].radius > 0.5:
                 self.explosions.pop(0)
         for i in self.explosions:
             i.radius += delta_t
 
+        # "age" the powerups on the map, and delete them if they get too old
         if len(self.powerups) > 0:
             if self.powerups[0].age > 9:
                 self.powerups.pop(0)
         for i in self.powerups:
             i.age += delta_t
 
+        # check if all the bubbles have been destroyed
         if len(self.bubbles) == 0:
             if self.afterfinish_timer > 0:
+                # the afterfinish timer is still counting down
                 self.afterfinish_timer -= delta_t;
             else:
+                # the afterfinish timer is done, add a life and set up the next level
                 self.level += 1
                 self.lives += 1
                 self.init_level(self.level)
                 return
         elif not self.ship.has_freeze():
+            # update all the bubbles
             for i in self.bubbles:
                 i.update(delta_t)
 
+        # update the bullet
         if self.bullet != None:
             bullet_wrapped = self.bullet.update(delta_t)
             if bullet_wrapped:
+                # delete the bullet if it has hit the edge of the map
                 self.bullet = None
 
+        # update the ship
         if self.ship == None:
             if self.afterdeath_timer > 0:
+                # player is dead and afterdeath timer is still counting down
                 self.afterdeath_timer -= delta_t
             elif self.lives > 0:
+                # create a new Ship for the next level
                 self.ship = Ship()
                 self.ship.add_shield() # add shields at the start of a life
             else:
+                # player has run out of lives, level 0 will make the start screen display
                 self.level = 0 # Game over
             return
 
