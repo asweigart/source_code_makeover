@@ -171,7 +171,7 @@ class Powerup(ObjectOnMap):
 class Ship(ObjectOnMap):
     def __init__(self):
         super(Ship, self).__init__(0.04) # all Ships are the same size.
-        self.shield_timer = 0
+        self._shield_timer = 0
         self.accel_x = 0 # acceleration rate of the ship
         self.accel_y = 0
 
@@ -195,7 +195,21 @@ class Ship(ObjectOnMap):
         self.speed.y += self.accel_y
         self.speed.x *= DECELERATION
         self.speed.y *= DECELERATION
+
+        # shield degrades over time until it reaches 0.
+        if self._shield_timer > 0:
+            self._shield_timer -= delta_t
+
         super(Ship, self).update(delta_t)
+
+    def add_shield(self, secs=6):
+        """Extends the time on the ship's shield by secs seconds."""
+        self._shield_timer += secs
+
+    def has_shield(self):
+        """Returns True if this ship currently has a shield, False if it does not have a shield."""
+        return self._shield_timer > 0
+
 
 class GameWorld:
     bubbles = []
@@ -223,7 +237,7 @@ class GameWorld:
         if (level > self.max_level): self.max_level = level
         if self.ship == None:
             self.ship = Ship()
-        self.ship.shield_timer += 6 # add 6 seconds of shield at the start of a level
+        self.ship.add_shield() # add shield at the start of a level
         self.bullet = None;
         self.death_timer = 0
         self.finish_timer = 0
@@ -251,8 +265,6 @@ class GameWorld:
                 self.powerups.pop(0)
         for i in self.powerups:
             i.age += delta_t
-        if (self.ship != None) and (self.ship.shield_timer > 0):
-            self.ship.shield_timer -= delta_t
         if self.bullet_shield_timer > 0:
             self.bullet_shield_timer -= delta_t
         if self.freeze_timer > 0:
@@ -280,7 +292,7 @@ class GameWorld:
                 self.death_timer -= delta_t
             elif self.lives > 0:
                 self.ship = Ship()
-                self.ship.shield_timer += 6 # add 6 seconds of shield at the start of a life
+                self.ship.add_shield() # add shields at the start of a life
             else:
                 self.level = 0 # Game over
             return
@@ -308,7 +320,7 @@ class GameWorld:
             elif self.ship != None:
                 if not b.collides_with(self.ship):
                     continue
-                if self.ship.shield_timer > 0:
+                if self.ship.has_shield():
                     continue
                 self.spawn_explosion(self.ship)
                 self.ship = None
@@ -341,7 +353,7 @@ class GameWorld:
 
     def apply_powerup(self, powerup):
         if powerup.kind == "shield":
-            self.ship.shield_timer += 6
+            self.ship.add_shield()
         elif powerup.kind == "bullet":
             self.bullet_shield_timer += 6
         elif powerup.kind == "freeze":
@@ -500,7 +512,7 @@ class GameScreen:
             scale_and_round(pos.x, pos.y),
             int(round(ship.radius * 0.5 * MAP_SIZE)),
             1)
-        if self.model.ship.shield_timer > 0:
+        if self.model.ship.has_shield():
             pygame.draw.rect(self.screen, SILVER, bbox, 1)
 
     def render_bullet(self):
