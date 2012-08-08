@@ -153,7 +153,7 @@ class Bubble(ObjectOnMap):
             elif self.kind == "big":
                 new_kind = "medium"
 
-            for i in range(20): # creates two new Bubbles
+            for i in range(2): # creates two new Bubbles
                 spawned_bubbles.append(Bubble(new_kind))
                 spawned_bubbles[-1].pos.copy(self.pos)
 
@@ -220,6 +220,26 @@ class Ship(ObjectOnMap):
     def has_super_bullets(self):
         """Returns True if this ship currently has a shield, False if it does not have a shield."""
         return self._super_bullet_timer > 0
+
+    def shoot_at(self, x, y):
+        """Returns a list of bullet objects that were created by the Ship."""
+        x -= self.pos.x;
+        y -= self.pos.y;
+
+        b = Bullet()
+        b.pos.copy(self.pos);
+        b.speed.x = x * 3
+        b.speed.y = y * 3
+
+        # Help out the poor sods who click on their
+        # own ship and get stuck with a non-moving
+        # bullet. (2009-11-14)
+        if abs(x) < 0.1 and abs(y) < 0.1:
+            b.speed.x *= 30
+            b.speed.y *= 30
+
+        return [b]
+
 
 class Bullet(ObjectOnMap):
     def __init__(self):
@@ -377,29 +397,6 @@ class GameWorld:
 
         if self.score > self.high_score:
             self.high_score = self.score
-
-    def shoot_at(self, x, y):
-        if self.bullet != None or self.ship == None:
-            return
-
-        x -= self.ship.pos.x;
-        y -= self.ship.pos.y;
-
-        b = ObjectOnMap(0.01)
-        b.pos.copy(self.ship.pos);
-        b.speed.x = x * 3
-        b.speed.y = y * 3
-
-        # Help out the poor sods who click on their
-        # own ship and get stuck with a non-moving
-        # bullet. (2009-11-14)
-        absx = abs(x)
-        absy = abs(y)
-        if absx < 0.1 and absy < 0.1:
-            b.speed.x *= 30
-            b.speed.y *= 30
-
-        self.bullet = b
 
 
 class GameScreen:
@@ -614,7 +611,8 @@ while running:
         # on mouse down, fire a bullet and start the thruster of the ship
         if (model.level > 0) and (model.ship != None) and (not renderer.game_paused):
             x, y = ev.pos
-            model.shoot_at(x / float(MAP_WIDTH), y / float(MAP_HEIGHT))
+            if model.bullet == None:
+                model.bullet = model.ship.shoot_at(x / float(MAP_WIDTH), y / float(MAP_HEIGHT))[0]
             model.ship.thrust_at(x / float(MAP_WIDTH), y / float(MAP_HEIGHT))
     elif ev.type == pygame.MOUSEBUTTONUP:
         # on mouse up, stop accelerating the ship
