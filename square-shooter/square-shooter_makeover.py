@@ -118,16 +118,13 @@ def random_position():
         return random.uniform(0.75, 1.0)
 
 
-def make_bubble(kind):
-    if kind == "big":
-        size = 0.1
-        speed = 0.1
-    elif kind == "medium":
-        size = 0.075
-        speed = 0.15
-    elif kind == "small":
-        size = 0.05
-        speed = 0.25
+def bubble_factory(kind):
+    #                   (size, speed)
+    kinds  = {'big':    (0.1,   0.1),
+              'medium': (0.075, 0.15),
+              'small':  (0.05,  0.25)}
+
+    size, speed = kinds[kind]
 
     new_bubble = ObjectOnMap(size)
     new_bubble.pos = Vector2D(
@@ -182,7 +179,7 @@ class GameWorld:
         del self.explosions[:]
         del self.powerups[:]
         for i in range(level):
-            self.bubbles.append(make_bubble("big"))
+            self.bubbles.append(bubble_factory("big"))
 
     def update(self, delta_t):
         self.handle_collisions(delta_t)
@@ -282,10 +279,10 @@ class GameWorld:
                 new_type = "medium"
             elif parent.kind == "medium":
                 new_type = "small"
-            b = make_bubble(new_type)
+            b = bubble_factory(new_type)
             b.pos.copy(parent.pos)
             self.bubbles.append(b)
-            b = make_bubble(new_type)
+            b = bubble_factory(new_type)
             b.pos.copy(parent.pos)
             self.bubbles.append(b)
 
