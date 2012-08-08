@@ -173,6 +173,7 @@ class Ship(ObjectOnMap):
         super(Ship, self).__init__(0.04) # all Ships are the same size.
         self._shield_timer = 0
         self._super_bullet_timer = 0
+        self._freeze_timer = 0
         self.accel_x = 0 # acceleration rate of the ship
         self.accel_y = 0
 
@@ -202,6 +203,8 @@ class Ship(ObjectOnMap):
             self._shield_timer -= delta_t
         if self.has_super_bullets():
             self._super_bullet_timer -= delta_t
+        if self.has_freeze():
+            self._freeze_timer -= delta_t
 
         super(Ship, self).update(delta_t)
 
@@ -214,12 +217,20 @@ class Ship(ObjectOnMap):
         return self._shield_timer > 0
 
     def add_super_bullets(self, secs=6):
-        """Extends the time on the ship's shield by secs seconds."""
+        """Extends the time on the ship's super bullets by secs seconds."""
         self._super_bullet_timer += secs
 
     def has_super_bullets(self):
-        """Returns True if this ship currently has a shield, False if it does not have a shield."""
+        """Returns True if this ship currently has a super bullets, False if it does not have a super bullets."""
         return self._super_bullet_timer > 0
+
+    def add_freeze(self, secs=6):
+        """Extends the time on the ship's freeze powerup by secs seconds."""
+        self._freeze_timer += secs
+
+    def has_freeze(self):
+        """Returns True if this ship currently has a freeze powerup, False if it does not have a shield."""
+        return self._freeze_timer > 0
 
     def shoot_at(self, x, y):
         """Returns a list of bullet objects that were created by the Ship."""
@@ -254,12 +265,8 @@ class GameWorld:
     bullet = None
     ship = None
 
-    accel_x = 0
-    accel_y = 0
-
     death_timer = 0
     finish_timer = 0
-    freeze_timer = 0
 
     level = 0
     score = 0
@@ -276,8 +283,6 @@ class GameWorld:
         self.bullet = None;
         self.death_timer = 0
         self.finish_timer = 0
-
-        self.freeze_timer = 0;
 
         del self.bubbles[:]
         del self.explosions[:]
@@ -300,9 +305,6 @@ class GameWorld:
         for i in self.powerups:
             i.age += delta_t
 
-        if self.freeze_timer > 0:
-            self.freeze_timer -= delta_t
-
         if len(self.bubbles) == 0:
             if self.finish_timer > 0:
                 self.finish_timer -= delta_t;
@@ -311,7 +313,7 @@ class GameWorld:
                 self.lives += 1
                 self.init_level(self.level)
                 return
-        elif self.freeze_timer <= 0:
+        elif not self.ship.has_freeze():
             for i in self.bubbles:
                 i.update(delta_t)
 
@@ -390,7 +392,7 @@ class GameWorld:
         elif powerup.kind == "bullet":
             self.ship.add_super_bullets()
         elif powerup.kind == "freeze":
-            self.freeze_timer += 6
+            self.ship.add_freeze()
         else:
             raise "Bad powerup type"
         self.score += self.level * 10
