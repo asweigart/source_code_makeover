@@ -74,7 +74,7 @@ class Vector2D:
         self.y = vector.y
 
 
-class Bubble2D:
+class ObjectOnMap:
     """Represents a circular object on the game map with position, radius, and velocity."""
 
     def __init__(self, radius):
@@ -103,7 +103,7 @@ class Bubble2D:
         return not (0 < self.pos.x < 1 and 0 < self.pos.y < 1)
 
     def collides_with(self, other):
-        """Returns True if this bubble is intersecting with the Bubble2D object passed in for the "other" parameter."""
+        """Returns True if this bubble is intersecting with the ObjectOnMap object passed in for the "other" parameter."""
         a = self.pos.x - other.pos.x
         b = self.pos.y - other.pos.y
         distance = math.sqrt(a * a + b * b)
@@ -117,10 +117,6 @@ def random_position():
     else:
         return random.uniform(0.75, 1.0)
 
-def random_speed(magnitude):
-    """Returns a random float value between -magnitude and magnitude."""
-    return random.uniform(-magnitude, magnitude)
-
 
 def make_bubble(kind):
     if kind == "big":
@@ -133,13 +129,13 @@ def make_bubble(kind):
         size = 0.05
         speed = 0.25
 
-    new_bubble = Bubble2D(size)
+    new_bubble = ObjectOnMap(size)
     new_bubble.pos = Vector2D(
         random_position(),
         random_position())
     new_bubble.speed = Vector2D(
-        random_speed(speed),
-        random_speed(speed))
+        random.uniform(-speed, speed),
+        random.uniform(-speed, speed))
     new_bubble.kind = kind
     return new_bubble
 
@@ -170,7 +166,7 @@ class GameWorld:
         self.level = level
         if (level > self.max_level): self.max_level = level
         if self.ship == None:
-            self.ship = Bubble2D(1.0 / 25)
+            self.ship = ObjectOnMap(1.0 / 25)
         self.ship.pos = Vector2D(0.5, 0.5)
         self.ship.speed = Vector2D(0, 0)
         self.bullet = None;
@@ -230,7 +226,7 @@ class GameWorld:
             if self.death_timer > 0:
                 self.death_timer -= delta_t
             elif self.lives > 0:
-                self.ship = Bubble2D(1.0 / 25)
+                self.ship = ObjectOnMap(1.0 / 25)
                 self.ship.pos = Vector2D(0.5, 0.5)
                 self.ship_shield_timer = 6;
             else:
@@ -294,12 +290,12 @@ class GameWorld:
             self.bubbles.append(b)
 
     def spawn_explosion(self, bubble):
-        explosion = Bubble2D(0)
+        explosion = ObjectOnMap(0)
         explosion.pos.copy(bubble.pos)
         self.explosions.append(explosion)
 
     def spawn_powerup(self, bubble):
-        powerup = Bubble2D(0.03)
+        powerup = ObjectOnMap(0.03)
         powerup.pos.copy(bubble.pos)
         powerup.kind = random.choice(("shield", "bullet", "freeze"))
         powerup.age = 0
@@ -337,7 +333,7 @@ class GameWorld:
         x -= self.ship.pos.x;
         y -= self.ship.pos.y;
 
-        b = Bubble2D(0.01)
+        b = ObjectOnMap(0.01)
         b.pos.copy(self.ship.pos);
         b.speed.x = x * 3
         b.speed.y = y * 3
