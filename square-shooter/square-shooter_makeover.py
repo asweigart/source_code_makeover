@@ -32,11 +32,26 @@ RED    = (255,   0,   0)
 SILVER = (204, 204, 204)
 WHITE  = (255, 255, 255)
 
+WINDOW_WIDTH = 640
+WINDOW_HEIGHT = 480
+
+MAP_WIDTH = 480
+MAP_HEIGHT = 480
+
+MAP_SIZE = max(MAP_WIDTH, MAP_HEIGHT)
+
+MAP_QUARTER_WIDTH       = int(MAP_WIDTH / 4.0)
+MAP_HALF_WIDTH          = int(MAP_WIDTH / 2.0)
+MAP_THREE_QUARTER_WIDTH = int(3 * MAP_WIDTH / 4.0)
+
+MAP_QUARTER_HEIGHT       = int(MAP_HEIGHT / 4.0)
+MAP_HALF_HEIGHT          = int(MAP_HEIGHT / 2.0)
+MAP_THREE_QUARTER_HEIGHT = int(3 * MAP_HEIGHT / 4.0)
+
 
 def scale_and_round(x, y):
-	x = int(round(x * 480))
-	y = int(round(y * 480))
-	return x, y
+	return int(round(x * MAP_WIDTH)), int(round(y * MAP_HEIGHT))
+
 
 class Vector2D:
 	def __init__(self, x, y):
@@ -390,7 +405,7 @@ class GameScreen:
 
 	def render_backround(self):
 		self.bglayer.fill(BLACK)
-		self.bglayer.fill(GREEN, (480, 0, 160, 480))
+		self.bglayer.fill(GREEN, (MAP_WIDTH, 0, 160, MAP_HEIGHT))
 
 		msg = ["Level", "Lives", "Score"]
 		for i in range(3):
@@ -404,26 +419,27 @@ class GameScreen:
 
 	def render_title_screen(self):
 		text = self.hud_font.render("SQUARE", False, GREEN)
-		self.screen.blit(text, text.get_rect(midbottom = (240, 240)))
+		self.screen.blit(text, text.get_rect(midbottom = (MAP_HALF_WIDTH, MAP_HALF_HEIGHT)))
 		text = self.hud_font.render("SHOOTER", False, GREEN)
-		self.screen.blit(text, text.get_rect(midtop = (240, 240)))
+		self.screen.blit(text, text.get_rect(midtop = (MAP_HALF_WIDTH, MAP_HALF_HEIGHT)))
 
 		text = self.msg_font.render("FCP", False, GREEN)
-		self.screen.blit(text, text.get_rect(midbottom = (240, 120)))
+		self.screen.blit(text, text.get_rect(midbottom = (MAP_HALF_WIDTH, MAP_QUARTER_HEIGHT)))
 		text = self.msg_font.render("presents", False, GREEN)
-		self.screen.blit(text, text.get_rect(midtop = (240, 120)))
+		self.screen.blit(text, text.get_rect(midtop = (MAP_HALF_WIDTH, MAP_QUARTER_HEIGHT)))
 
 		high_score = "High score: " + str(self.model.high_score)
 		text = self.msg_font.render(high_score, False, GREEN)
-		self.screen.blit(text, text.get_rect(midbottom = (240, 360)))
+		self.screen.blit(text, text.get_rect(midbottom = (MAP_HALF_WIDTH, MAP_THREE_QUARTER_HEIGHT)))
+
 		max_level = "Max level: " + str(self.model.max_level)
 		text = self.msg_font.render(max_level, False, GREEN)
-		self.screen.blit(text, text.get_rect(midtop = (240, 360)))
+		self.screen.blit(text, text.get_rect(midtop = (MAP_HALF_WIDTH, MAP_THREE_QUARTER_HEIGHT)))
 
 	def render_game_world(self):
 		m = self.model
 
-		self.screen.set_clip((0, 0, 480, 480))
+		self.screen.set_clip((0, 0, MAP_WIDTH, MAP_HEIGHT))
 
 		if m.ship != None: self.render_ship()
 		if m.bullet != None: self.render_bullet()
@@ -437,7 +453,7 @@ class GameScreen:
 				self.screen,
 				bubble.color,
 				scale_and_round(pos.x, pos.y),
-				int(round(bubble.radius * 480)),
+				int(round(bubble.radius * MAP_SIZE)),
 				1)
 		for explosion in m.explosions:
 			pos = explosion.position
@@ -445,7 +461,7 @@ class GameScreen:
 				self.screen,
 				RED,
 				scale_and_round(pos.x, pos.y),
-				int(round(explosion.radius * 480)),
+				int(round(explosion.radius * MAP_SIZE)),
 				1)
 		for i in m.powerups:
 			self.render_powerup(i)
@@ -459,12 +475,12 @@ class GameScreen:
 			self.screen,
 			SILVER,
 			scale_and_round(pos.x, pos.y),
-			int(round(ship.radius * 480)))
+			int(round(ship.radius * MAP_SIZE)))
 		pygame.draw.circle(
 			self.screen,
 			BLACK,
 			scale_and_round(pos.x, pos.y),
-			int(round(ship.radius * 0.5 * 480)),
+			int(round(ship.radius * 0.5 * MAP_SIZE)),
 			1)
 		if self.model.ship_shield_timer > 0:
 			pygame.draw.rect(self.screen, SILVER, bbox, 1)
@@ -476,13 +492,13 @@ class GameScreen:
 			self.screen,
 			RED,
 			scale_and_round(pos.x, pos.y),
-			int(round(bullet.radius * 480)))
+			int(round(bullet.radius * MAP_SIZE)))
 		if self.model.bullet_shield_timer > 0:
 			pygame.draw.rect(self.screen, RED, bbox, 1)
 
 	def render_powerup(self, powerup):
 		pos = powerup.position
-		radius = powerup.radius * 480
+		radius = powerup.radius * MAP_SIZE
 		if powerup.kind	== "shield":
 			bbox = pygame.draw.circle(
 				self.screen,
@@ -499,11 +515,11 @@ class GameScreen:
 				int(round(radius * 0.3)),
 				1)
 			bbox = pygame.Rect(0, 0, radius * 2, radius * 2)
-			bbox.center = (pos.x * 480, pos.y * 480)
+			bbox.center = (pos.x * MAP_WIDTH, pos.y * MAP_HEIGHT)
 			pygame.draw.rect(self.screen, WHITE, bbox, 1)
 		elif powerup.kind == "freeze":
 			bbox = pygame.Rect(0, 0, radius * 2, radius * 2)
-			bbox.center = (pos.x * 480, pos.y * 480)
+			bbox.center = (pos.x * MAP_WIDTH, pos.y * MAP_HEIGHT)
 			pygame.draw.rect(self.screen, WHITE, bbox, 1)
 			bbox.inflate_ip(-radius, -radius)
 			pygame.draw.rect(self.screen, WHITE, bbox, 1)
@@ -516,11 +532,11 @@ class GameScreen:
 		pause_text = self.msg_font.render("Game paused", False, GREEN)
 		self.screen.blit(
 			pause_text,
-			pause_text.get_rect(midbottom = (240, 480)))
+			pause_text.get_rect(midbottom = (MAP_HALF_WIDTH, MAP_HEIGHT)))
 
 pygame.init()
 
-screen = pygame.display.set_mode((640, 480))
+screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 clock = pygame.time.Clock()
 model = GameWorld()
 renderer = GameScreen(model, screen)
@@ -554,8 +570,8 @@ while running:
 	elif ev.type == pygame.MOUSEBUTTONDOWN:
 		if model.level > 0 and not renderer.game_paused:
 			x, y = ev.pos
-			model.shoot_at(x / 480.0, y / 480.0)
-			model.thrust_at(x / 480.0, y / 480.0)
+			model.shoot_at(x / float(MAP_WIDTH), y / float(MAP_HEIGHT))
+			model.thrust_at(x / float(MAP_WIDTH), y / float(MAP_HEIGHT))
 	elif ev.type == pygame.MOUSEBUTTONUP:
 		if model.level > 0:
 			model.stop_thrust()
