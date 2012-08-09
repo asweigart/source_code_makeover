@@ -324,7 +324,7 @@ class GameWorld:
                 self.lives += 1
                 self.init_level(self.level)
                 return
-        elif not self.ship.has_freeze():
+        elif self.ship != None and not self.ship.has_freeze():
             # update all the bubbles
             for bubble in self.bubbles:
                 bubble.update(delta_t)
