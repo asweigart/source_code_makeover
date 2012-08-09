@@ -356,7 +356,7 @@ class GameWorld:
         for b in self.bubbles:
             if self.bullet != None and b.collides_with(self.bullet):
                 self.bubbles.remove(b)
-                if not self.ship.has_super_bullets():
+                if self.ship != None and not self.ship.has_super_bullets():
                     self.bullet = None
                 else:
                     # Push it along or it will just
