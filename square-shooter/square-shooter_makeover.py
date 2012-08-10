@@ -354,7 +354,7 @@ class GameWorld:
 
     def handle_collisions(self, delta_t):
         for b in self.bubbles:
-            if self.bullet != None and b.collides_with(self.bullet):
+            if self.bullet != None and self.bullet.collides_with(b):
                 self.bubbles.remove(b)
                 if self.ship != None and not self.ship.has_super_bullets():
                     self.bullet = None
@@ -553,7 +553,7 @@ class GameScreen:
             RED,
             scale_and_round(pos.x, pos.y),
             int(round(bullet.radius * MAP_SIZE)))
-        if self.world.ship.has_super_bullets():
+        if self.world.ship != None and self.world.ship.has_super_bullets():
             pygame.draw.rect(self.screen, RED, bbox, 1)
 
     def render_powerup(self, powerup):
