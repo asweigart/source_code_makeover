@@ -146,7 +146,7 @@ class Bubble(ObjectOnMap):
 
         if self.kind == "small":
             # Small Bubbles do not create new Bubbles, but might create Powerups.
-            if random.random() < 0.25:
+            if random.random() < 10.25:
                 spawned_powerups.append(Powerup(self.pos))
         else:
             # Medium and Big Bubbles create new Bubble objects of the next smaller size. They don't create Powerups.
@@ -175,6 +175,38 @@ class Powerup(ObjectOnMap):
         self.pos.copy(pos)
         self.kind = random.choice(("shield", "bullet", "freeze"))
         self.age = 0
+
+    def render(self, surface):
+        scaled_x, scaled_y = scale_and_round(self.pos.x, self.pos.y)
+        scaled_r = int(round(self.radius * MAP_SIZE))
+        if self.kind == "shield":
+            bbox = pygame.draw.circle(
+                surface,
+                WHITE,
+                (scaled_x, scaled_y),
+                scaled_r,
+                1)
+            pygame.draw.rect(surface, WHITE, bbox, 1)
+        elif self.kind == "bullet":
+            pygame.draw.circle(
+                surface,
+                WHITE,
+                (scaled_x, scaled_y),
+                int(round(scaled_r * 0.3)),
+                1)
+            bbox = pygame.Rect(0, 0, scaled_r * 2, scaled_r * 2)
+            bbox.center = (scaled_x, scaled_y)
+            pygame.draw.rect(surface, WHITE, bbox, 1)
+        elif self.kind == "freeze":
+            bbox = pygame.Rect(0, 0, scaled_r * 2, scaled_r * 2)
+            bbox.center = (scaled_x, scaled_y)
+            pygame.draw.rect(surface, WHITE, bbox, 1)
+            bbox.inflate_ip(-scaled_r, -scaled_r)
+            pygame.draw.rect(surface, WHITE, bbox, 1)
+            bbox.inflate_ip(-scaled_r * 0.5, -scaled_r * 0.5)
+            pygame.draw.rect(surface, WHITE, bbox, 1)
+        else:
+            raise "Bad power-up kind: " + self.kind
 
 
 class Ship(ObjectOnMap):
@@ -546,42 +578,11 @@ class GameScreen:
         for explosion in self.world.explosions:
             explosion.render(self.screen)
 
-        for i in self.world.powerups:
-            self.render_powerup(i)
+        for powerup in self.world.powerups:
+            powerup.render(self.screen)
 
         self.screen.set_clip(None)
 
-    def render_powerup(self, powerup):
-        pos = powerup.pos
-        radius = powerup.radius * MAP_SIZE
-        if powerup.kind    == "shield":
-            bbox = pygame.draw.circle(
-                self.screen,
-                WHITE,
-                scale_and_round(pos.x, pos.y),
-                int(round(radius)),
-                1)
-            pygame.draw.rect(self.screen, WHITE, bbox, 1)
-        elif powerup.kind == "bullet":
-            pygame.draw.circle(
-                self.screen,
-                WHITE,
-                scale_and_round(pos.x, pos.y),
-                int(round(radius * 0.3)),
-                1)
-            bbox = pygame.Rect(0, 0, radius * 2, radius * 2)
-            bbox.center = (pos.x * MAP_WIDTH, pos.y * MAP_HEIGHT)
-            pygame.draw.rect(self.screen, WHITE, bbox, 1)
-        elif powerup.kind == "freeze":
-            bbox = pygame.Rect(0, 0, radius * 2, radius * 2)
-            bbox.center = (pos.x * MAP_WIDTH, pos.y * MAP_HEIGHT)
-            pygame.draw.rect(self.screen, WHITE, bbox, 1)
-            bbox.inflate_ip(-radius, -radius)
-            pygame.draw.rect(self.screen, WHITE, bbox, 1)
-            bbox.inflate_ip(-radius * 0.5, -radius * 0.5)
-            pygame.draw.rect(self.screen, WHITE, bbox, 1)
-        else:
-            raise "Bad power-up kind: " + powerup.kind
 
     def render_pause_text(self):
         pause_text = self.msg_font.render("Game paused", False, GREEN)
