@@ -114,10 +114,10 @@ class ObjectOnMap(object):
 
 
 class Bubble(ObjectOnMap):
-    #                   (size, speed)
-    kinds  = {'big':    (0.1,   0.1),
-              'medium': (0.075, 0.15),
-              'small':  (0.05,  0.25)}
+    #                  (size, speed)
+    kinds = {'big':    (0.1,   0.1),
+             'medium': (0.075, 0.15),
+             'small':  (0.05,  0.25)}
 
     colors = [pygame.Color('#ffffcc'),
               pygame.Color('#ffccff'),
@@ -391,25 +391,22 @@ class GameWorld:
         self.explosions.append(explosion)
 
     def mark_score(self, bubble):
-        if bubble.kind == "small":
-            self.score += 5
-        elif bubble.kind == "medium":
-            self.score += 2
-        elif bubble.kind == "big":
-            self.score += 1
+        #                  score
+        kinds = {'big':    1,
+                 'medium': 2,
+                 'small':  5}
+        self.score += kinds[bubble.kind]
 
         if self.score > self.high_score:
             self.high_score = self.score
 
     def apply_powerup(self, powerup):
-        if powerup.kind == "shield":
-            self.ship.add_shield()
-        elif powerup.kind == "bullet":
-            self.ship.add_super_bullets()
-        elif powerup.kind == "freeze":
-            self.ship.add_freeze()
-        else:
-            raise "Bad powerup type"
+        #                  function to call
+        kinds = {'shield': self.ship.add_shield,
+                 'bullet': self.ship.add_super_bullets,
+                 'freeze': self.ship.add_freeze}
+        kinds[powerup.kind]()
+
         self.score += self.level * 10
 
         if self.score > self.high_score:
