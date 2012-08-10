@@ -447,9 +447,6 @@ class GameScreen:
         text = self.hud_font.render(str(self.world.score), False, BLACK)
         self.screen.blit(text, (MAP_WIDTH + 20, 48 * 5))
 
-        fps_text = self.msg_font.render(str(self.fps), False, GREEN)
-        self.screen.blit(fps_text, (0, 0))
-
         pygame.display.flip()
 
     def render_background(self, level):
