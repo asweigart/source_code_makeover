@@ -35,8 +35,8 @@ WHITE  = (255, 255, 255)
 WINDOW_WIDTH = 640
 WINDOW_HEIGHT = 480
 
-MAP_WIDTH = 480
-MAP_HEIGHT = 480
+MAP_WIDTH = WINDOW_WIDTH - 160
+MAP_HEIGHT = WINDOW_HEIGHT
 
 MAP_SIZE = max(MAP_WIDTH, MAP_HEIGHT)
 
@@ -418,20 +418,17 @@ class GameScreen:
         self.world = world
 
         self.screen = screen
-        self.width, self.height = screen.get_size()
-        self.bglayer = pygame.Surface(screen.get_size())
+        self.bglayer = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
 
         font_name = pygame.font.get_default_font()
         self.hud_font =    pygame.font.SysFont(
-            font_name, self.height / 10)
+            font_name, WINDOW_HEIGHT / 10)
         self.msg_font = pygame.font.SysFont(
-            font_name, self.height / 20)
-
-
+            font_name, WINDOW_HEIGHT / 20)
 
         self.game_paused = False
 
-        self.render_backround()
+        self.render_background()
 
     def render(self):
         m = self.world
@@ -460,7 +457,7 @@ class GameScreen:
 
         pygame.display.flip()
 
-    def render_backround(self):
+    def render_background(self):
         self.bglayer.fill(BLACK)
         self.bglayer.fill(GREEN, (MAP_WIDTH, 0, WINDOW_WIDTH - MAP_WIDTH, MAP_HEIGHT))
 
