@@ -428,36 +428,31 @@ class GameScreen:
 
         self.game_paused = False
 
-        self.render_background()
 
     def render(self):
-        m = self.world
-
         self.screen.blit(self.bglayer, (0, 0))
+        self.render_background(self.world.level)
 
-        if m.level == 0:
+        if self.world.level == 0:
             self.render_title_screen()
-            # Hide the [P]ause text.
-            self.screen.fill(GREEN, (MAP_WIDTH + 20, 424, 140, 24))
         else:
             self.render_game_world()
-            # Hide the [P]lay text.
-            self.screen.fill(GREEN, (MAP_WIDTH + 20, 400, 140, 24))
-            if self.game_paused: self.render_pause_text()
+            if self.game_paused:
+                self.render_pause_text()
 
-        text = self.hud_font.render(str(m.level), False, BLACK)
+        text = self.hud_font.render(str(self.world.level), False, BLACK)
         self.screen.blit(text, (MAP_WIDTH + 20, 48))
-        text = self.hud_font.render(str(m.lives), False, BLACK)
+        text = self.hud_font.render(str(self.world.lives), False, BLACK)
         self.screen.blit(text, (MAP_WIDTH + 20, 48 * 3))
-        text = self.hud_font.render(str(m.score), False, BLACK)
+        text = self.hud_font.render(str(self.world.score), False, BLACK)
         self.screen.blit(text, (MAP_WIDTH + 20, 48 * 5))
 
-        #fps_text = self.msg_font.render(str(self.fps), False, GREEN)
-        #self.screen.blit(fps_text, (0, 0))
+        fps_text = self.msg_font.render(str(self.fps), False, GREEN)
+        self.screen.blit(fps_text, (0, 0))
 
         pygame.display.flip()
 
-    def render_background(self):
+    def render_background(self, level):
         self.bglayer.fill(BLACK)
         self.bglayer.fill(GREEN, (MAP_WIDTH, 0, WINDOW_WIDTH - MAP_WIDTH, MAP_HEIGHT))
 
@@ -466,10 +461,15 @@ class GameScreen:
             text = self.hud_font.render(msg[i], False, BLACK)
             self.bglayer.blit(text, (MAP_WIDTH + 20, i * 96))
 
-        msg = ["[Q]uit", "[P]ause", "[P]lay"]
-        for i in range(3):
-            text = self.msg_font.render(msg[i], False, WHITE)
-            self.bglayer.blit(text, (MAP_WIDTH + 20, 448 - i * 24))
+        text = self.msg_font.render('[Q]uit', False, WHITE)
+        self.bglayer.blit(text, (MAP_WIDTH + 20, 424))
+
+        if level == 0:
+            msg = '[P]lay'
+        else:
+            msg = '[P]ause'
+        text = self.msg_font.render(msg, False, WHITE)
+        self.bglayer.blit(text, (MAP_WIDTH + 20, 400))
 
     def render_title_screen(self):
         text = self.hud_font.render("SQUARE", False, GREEN)
@@ -491,14 +491,12 @@ class GameScreen:
         self.screen.blit(text, text.get_rect(midtop = (MAP_HALF_WIDTH, MAP_THREE_QUARTER_HEIGHT)))
 
     def render_game_world(self):
-        m = self.world
-
         self.screen.set_clip((0, 0, MAP_WIDTH, MAP_HEIGHT))
 
-        if m.ship != None: self.render_ship()
-        if m.bullet != None: self.render_bullet()
+        if self.world.ship != None: self.render_ship()
+        if self.world.bullet != None: self.render_bullet()
 
-        for bubble in m.bubbles:
+        for bubble in self.world.bubbles:
             pos = bubble.pos
             pygame.draw.circle(
                 self.screen,
@@ -506,7 +504,7 @@ class GameScreen:
                 scale_and_round(pos.x, pos.y),
                 int(round(bubble.radius * MAP_SIZE)),
                 1)
-        for explosion in m.explosions:
+        for explosion in self.world.explosions:
             pos = explosion.pos
             pygame.draw.circle(
                 self.screen,
@@ -514,7 +512,7 @@ class GameScreen:
                 scale_and_round(pos.x, pos.y),
                 int(round(explosion.radius * MAP_SIZE)),
                 1)
-        for i in m.powerups:
+        for i in self.world.powerups:
             self.render_powerup(i)
 
         self.screen.set_clip(None)
