@@ -161,6 +161,13 @@ class Bubble(ObjectOnMap):
 
         return (spawned_bubbles, spawned_powerups)
 
+    def render(self, surface):
+        pygame.draw.circle(
+            surface,
+            self.color,
+            scale_and_round(self.pos.x, self.pos.y),
+            int(round(self.radius * MAP_SIZE)),
+            1)
 
 class Powerup(ObjectOnMap):
     def __init__(self, pos):
@@ -280,6 +287,21 @@ class Bullet(ObjectOnMap):
         if self.shield:
             pygame.draw.rect(surface, RED, bbox, 1)
 
+class Explosion(ObjectOnMap):
+    def __init__(self):
+        super(Explosion, self).__init__(0) # explosions start at size 0
+
+    def update(self, delta_t):
+        self.radius += delta_t
+
+    def render(self, surface):
+        pygame.draw.circle(
+            surface,
+            RED,
+            scale_and_round(self.pos.x, self.pos.y),
+            int(round(self.radius * MAP_SIZE)),
+            1)
+
 class GameWorld:
     bubbles = []
     explosions = []
@@ -323,8 +345,8 @@ class GameWorld:
         self.handle_collisions(delta_t)
 
         # expand the explosions and delete them once they get too big
-        for i in self.explosions:
-            i.radius += delta_t
+        for explosion in self.explosions:
+            explosion.update(delta_t)
         for i in range(len(self.explosions) - 1, -1, -1):
             if self.explosions[i].radius > MAX_EXPLOSION_SIZE:
                 self.explosions.pop(i)
@@ -409,7 +431,7 @@ class GameWorld:
                     self.powerups.remove(p)
 
     def spawn_explosion(self, bubble):
-        explosion = ObjectOnMap(0)
+        explosion = Explosion()
         explosion.pos.copy(bubble.pos)
         self.explosions.append(explosion)
 
@@ -519,21 +541,11 @@ class GameScreen:
             self.world.bullet.render(self.screen)
 
         for bubble in self.world.bubbles:
-            pos = bubble.pos
-            pygame.draw.circle(
-                self.screen,
-                bubble.color,
-                scale_and_round(pos.x, pos.y),
-                int(round(bubble.radius * MAP_SIZE)),
-                1)
+            bubble.render(self.screen)
+
         for explosion in self.world.explosions:
-            pos = explosion.pos
-            pygame.draw.circle(
-                self.screen,
-                RED,
-                scale_and_round(pos.x, pos.y),
-                int(round(explosion.radius * MAP_SIZE)),
-                1)
+            explosion.render(self.screen)
+
         for i in self.world.powerups:
             self.render_powerup(i)
 
