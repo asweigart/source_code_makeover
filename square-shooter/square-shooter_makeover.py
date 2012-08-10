@@ -146,7 +146,7 @@ class Bubble(ObjectOnMap):
 
         if self.kind == "small":
             # Small Bubbles do not create new Bubbles, but might create Powerups.
-            if random.random() < 10.25:
+            if random.random() < 0.25:
                 spawned_powerups.append(Powerup(self.pos))
         else:
             # Medium and Big Bubbles create new Bubble objects of the next smaller size. They don't create Powerups.
