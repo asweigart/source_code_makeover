@@ -250,12 +250,35 @@ class Ship(ObjectOnMap):
 
         return [b]
 
+    def render(self, surface):
+        bbox = pygame.draw.circle(
+            surface,
+            SILVER,
+            scale_and_round(self.pos.x, self.pos.y),
+            int(round(self.radius * MAP_SIZE)))
+        pygame.draw.circle(
+            surface,
+            BLACK,
+            scale_and_round(self.pos.x, self.pos.y),
+            int(round(self.radius * 0.5 * MAP_SIZE)),
+            1)
+        if self.has_shield():
+            pygame.draw.rect(surface, SILVER, bbox, 1)
+
 
 class Bullet(ObjectOnMap):
     def __init__(self):
         super(Bullet, self).__init__(0.01) # all Bullet objects are the same size
         self.shield = False
 
+    def render(self, surface):
+        bbox = pygame.draw.circle(
+            surface,
+            RED,
+            scale_and_round(self.pos.x, self.pos.y),
+            int(round(self.radius * MAP_SIZE)))
+        if self.shield:
+            pygame.draw.rect(surface, RED, bbox, 1)
 
 class GameWorld:
     bubbles = []
@@ -490,8 +513,10 @@ class GameScreen:
     def render_game_world(self):
         self.screen.set_clip((0, 0, MAP_WIDTH, MAP_HEIGHT))
 
-        if self.world.ship != None: self.render_ship()
-        if self.world.bullet != None: self.render_bullet()
+        if self.world.ship != None:
+            self.world.ship.render(self.screen)
+        if self.world.bullet != None:
+            self.world.bullet.render(self.screen)
 
         for bubble in self.world.bubbles:
             pos = bubble.pos
@@ -513,34 +538,6 @@ class GameScreen:
             self.render_powerup(i)
 
         self.screen.set_clip(None)
-
-    def render_ship(self):
-        ship = self.world.ship
-        pos = ship.pos
-        bbox = pygame.draw.circle(
-            self.screen,
-            SILVER,
-            scale_and_round(pos.x, pos.y),
-            int(round(ship.radius * MAP_SIZE)))
-        pygame.draw.circle(
-            self.screen,
-            BLACK,
-            scale_and_round(pos.x, pos.y),
-            int(round(ship.radius * 0.5 * MAP_SIZE)),
-            1)
-        if self.world.ship.has_shield():
-            pygame.draw.rect(self.screen, SILVER, bbox, 1)
-
-    def render_bullet(self):
-        bullet = self.world.bullet
-        pos = bullet.pos
-        bbox = pygame.draw.circle(
-            self.screen,
-            RED,
-            scale_and_round(pos.x, pos.y),
-            int(round(bullet.radius * MAP_SIZE)))
-        if self.world.ship != None and self.world.ship.has_super_bullets():
-            pygame.draw.rect(self.screen, RED, bbox, 1)
 
     def render_powerup(self, powerup):
         pos = powerup.pos
