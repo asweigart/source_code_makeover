@@ -606,23 +606,22 @@ renderer = GameScreen(world, screen)
 pygame.display.set_caption("Square Shooter Desktop Edition")
 pygame.event.set_blocked(pygame.MOUSEMOTION)
 
-running = True
-while running:
+while True:
     delta_t = clock.tick(60)
     if DISPLAY_FPS:
         renderer.fps = int(round(clock.get_fps()))
 
     ev = pygame.event.poll()
     if ev.type == pygame.QUIT:
-        running = False
+        break
     elif ev.type == pygame.KEYUP:
         if ev.key == pygame.K_ESCAPE:
-            running = False
+            break
         elif ev.key == pygame.K_q:
             if world.level > 0:
                 world.level = 0
             else:
-                running = False
+                break
         elif ev.key == pygame.K_p:
             if world.level == 0:
                 world.score = 0
