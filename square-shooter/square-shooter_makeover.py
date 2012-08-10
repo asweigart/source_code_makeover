@@ -32,6 +32,8 @@ RED    = (255,   0,   0)
 SILVER = (204, 204, 204)
 WHITE  = (255, 255, 255)
 
+DISPLAY_FPS = False
+
 WINDOW_WIDTH = 640
 WINDOW_HEIGHT = 480
 
@@ -524,6 +526,10 @@ class GameScreen:
         text = self.hud_font.render(str(self.world.score), False, BLACK)
         self.screen.blit(text, (MAP_WIDTH + 20, 48 * 5))
 
+        if DISPLAY_FPS:
+            fps_text = self.msg_font.render(str(self.fps), False, GREEN)
+            self.screen.blit(fps_text, (0, 0))
+
         pygame.display.flip()
 
     def render_background(self, level):
@@ -603,7 +609,8 @@ pygame.event.set_blocked(pygame.MOUSEMOTION)
 running = True
 while running:
     delta_t = clock.tick(60)
-    #renderer.fps = int(round(clock.get_fps()))
+    if DISPLAY_FPS:
+        renderer.fps = int(round(clock.get_fps()))
 
     ev = pygame.event.poll()
     if ev.type == pygame.QUIT:
