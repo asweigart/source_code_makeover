@@ -357,7 +357,7 @@ class GameWorld:
             if self.bullet != None and self.bullet.collides_with(b):
                 self.bubbles.remove(b)
                 if self.ship != None and not self.ship.has_super_bullets():
-                    self.bullet = None
+                    self.bullet = None # delete the non-super bullet when it hits a bubble
                 else:
                     # Push it along or it will just
                     # destroy the newly formed bubbles.
@@ -367,26 +367,23 @@ class GameWorld:
                 self.powerups.extend(spawned_powerups)
                 self.spawn_explosion(b)
                 self.mark_score(b)
-                if len(self.bubbles) == 0:
+                if not len(self.bubbles):
                     self.afterfinish_timer = 3
                 break
-            elif self.ship != None:
-                if not b.collides_with(self.ship):
-                    continue
-                if self.ship.has_shield():
-                    continue
+
+            # check if the bubble has hit the ship
+            if self.ship != None and b.collides_with(self.ship) and not self.ship.has_shield():
                 self.spawn_explosion(self.ship)
                 self.ship = None
                 self.lives -= 1
                 self.afterdeath_timer = 3;
                 break
 
-        if self.ship == None: return
-
-        for p in self.powerups[:]:
-            if p.collides_with(self.ship):
-                self.apply_powerup(p)
-                self.powerups.remove(p)
+        if self.ship != None:
+            for p in self.powerups[:]:
+                if p.collides_with(self.ship):
+                    self.apply_powerup(p)
+                    self.powerups.remove(p)
 
     def spawn_explosion(self, bubble):
         explosion = ObjectOnMap(0)
