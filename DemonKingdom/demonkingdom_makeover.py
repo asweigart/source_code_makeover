@@ -8,7 +8,6 @@ import pygame
 import random
 import copy
 import sys
-import easygui
 
 class Background(pygame.sprite.Sprite):
     def __init__(self,image):
@@ -27,13 +26,13 @@ class Sidebar():
         self.gems = 0
         self.gemsText = self.font.render(str(self.gems)+" gems",1,lightGrey)
         self.spells = pygame.sprite.Group()
-        spell = spellIcon(pygame.image.load("fireballIcon.bmp"),100,360+30,5,castFireBall,1)
+        spell = spellIcon(pygame.image.load("images/fireballIcon.bmp"),100,360+30,5,castFireBall,1)
         self.spells.add(spell)
-        spell = spellIcon(pygame.image.load("whirlwindIcon.bmp"),170,360+31,8,castWhirlWind,2)
+        spell = spellIcon(pygame.image.load("images/whirlwindIcon.bmp"),170,360+31,8,castWhirlWind,2)
         self.spells.add(spell)
-        spell = spellIcon(pygame.image.load("ghostIcon.bmp"),240,360+30,10,castGhost,3)
+        spell = spellIcon(pygame.image.load("images/ghostIcon.bmp"),240,360+30,10,castGhost,3)
         self.spells.add(spell)
-        self.logo = logo(pygame.image.load("logo.bmp"),360,360+10)
+        self.logo = logo(pygame.image.load("images/logo.bmp"),360,360+10)
     def draw(self):
         pygame.draw.rect(screen,black,[0,360,size[0],size[1]-360])
         screen.blit(self.gemsText,[10,360+20])
@@ -61,7 +60,7 @@ class MySprite(pygame.sprite.Sprite):
         self.columns = 1
         self.last_time = 0
     def load(self, filename, width, height, columns):
-        self.master_image = pygame.image.load(filename)
+        self.master_image = pygame.image.load('images/' + filename)
         self.master_image.set_colorkey(white, pygame.RLEACCEL)
         self.frame_width = width
         self.frame_height = height
@@ -259,20 +258,20 @@ pygame.display.flip()
 
 #sound
 pygame.mixer.init()
-sword = pygame.mixer.Sound("sword.wav")
-fireballSound = pygame.mixer.Sound("fireball.wav")
-whirlwindSound = pygame.mixer.Sound("whirlwind.wav")
-ghostSound = pygame.mixer.Sound("ghost.wav")
-getGem = pygame.mixer.Sound("pickupGem.wav")
+sword = pygame.mixer.Sound("sounds/sword.wav")
+fireballSound = pygame.mixer.Sound("sounds/fireball.wav")
+whirlwindSound = pygame.mixer.Sound("sounds/whirlwind.wav")
+ghostSound = pygame.mixer.Sound("sounds/ghost.wav")
+getGem = pygame.mixer.Sound("sounds/pickupGem.wav")
 
 #background
-background = Background(pygame.image.load("background.png").convert())
+background = Background(pygame.image.load("images/background.png").convert())
 sidebar = Sidebar()
-back2 = pygame.image.load("background2.png").convert()
-back3 = pygame.image.load("background3.png").convert()
-back4 = pygame.image.load("background4.png").convert()
-back5 = pygame.image.load("background5.png").convert()
-back6 = pygame.image.load("background6.png").convert()
+back2 = pygame.image.load("images/background2.png").convert()
+back3 = pygame.image.load("images/background3.png").convert()
+back4 = pygame.image.load("images/background4.png").convert()
+back5 = pygame.image.load("images/background5.png").convert()
+back6 = pygame.image.load("images/background6.png").convert()
 
 #monsters
 gems = pygame.sprite.Group()
@@ -655,7 +654,7 @@ while done==False and gameover==False:
     else:
         mouseLastDown = False
     time+=15
-    
+
     i=0
     for monster in monsters:
         i+=1
@@ -800,13 +799,13 @@ while done==False and gameover==False:
                     clock.tick(20)
                 gameover = True
                 youwin = True
-    
+
     if random.randint(0,150) == 150:
         gem = copy.copy(gemTemplate)
         gem.update(1,False)
         gem.set_rect(random.randint(20,size[1]-20),random.randint(36,size[1]-36-sidebarLength))
         gems.add(copy.copy(gem))
-    
+
     draw()
     # Limit to 20 frames per second
     clock.tick(20)
@@ -825,5 +824,5 @@ if done==False:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 done=True
-easygui.msgbox("Game By: Logi540\nImages From: www.spriters-resource.com\nMusic and Sound Effects From: www.soundbible.com","Credits","Close")
+
 sys.exit()
