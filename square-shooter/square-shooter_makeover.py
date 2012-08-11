@@ -212,6 +212,8 @@ class Powerup(ObjectOnMap):
             bbox.center = (scaled_x, scaled_y)
             pygame.draw.rect(surface, WHITE, bbox, 1)
             pygame.draw.line(surface, WHITE, bbox.midleft, bbox.midright, 1)
+            pygame.draw.line(surface, WHITE, bbox.midleft, bbox.topright, 1)
+            pygame.draw.line(surface, WHITE, bbox.midleft, bbox.bottomright, 1)
         else:
             raise "Bad power-up kind: " + self.kind
 
