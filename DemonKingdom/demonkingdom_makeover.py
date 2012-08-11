@@ -111,9 +111,11 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.rect.left = x
 
     def __str__(self):
-        return str(self.frame) + ", 0" + \
-        ", " + str(self.last_frame) + ", " + str(self.frame_width) + \
-        ", " + str(self.frame_height) + ", " + str(self.columns)
+        return str({'frame': self.frame,
+                    'last_frame': self.last_frame,
+                    'frame_width': self.frame_width,
+                    'frame_height': self.frame_height,
+                    'columns': self.columns})
 
 class Monster(AnimatedSprite):
     def set_speed(self, speed):
