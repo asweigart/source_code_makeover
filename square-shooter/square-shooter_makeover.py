@@ -363,7 +363,7 @@ class GameWorld:
         if self.ship == None:
             self.ship = Ship()
         self.ship.add_shield() # add shield at the start of a level
-        self.bullet = None;
+        self.bullets = [];
 
         self.afterdeath_timer = 0
         self.afterfinish_timer = 0
@@ -408,12 +408,12 @@ class GameWorld:
             for bubble in self.bubbles:
                 bubble.update(delta_t)
 
-        # update the bullet
-        if self.bullet != None:
-            bullet_wrapped = self.bullet.update(delta_t)
+        # update the bullets
+        for i in range(len(self.bullets) - 1, -1, -1):
+            bullet_wrapped = self.bullets[i].update(delta_t)
             if bullet_wrapped:
                 # delete the bullet if it has hit the edge of the map
-                self.bullet = None
+                del self.bullets[i]
 
         # update the ship
         if self.ship == None:
@@ -433,22 +433,23 @@ class GameWorld:
 
     def handle_collisions(self, delta_t):
         for b in self.bubbles:
-            if self.bullet != None and self.bullet.collides_with(b):
-                self.bubbles.remove(b)
-                if self.ship != None and not self.ship.has_super_bullets():
-                    self.bullet = None # delete the non-super bullet when it hits a bubble
-                else:
-                    # Push it along or it will just
-                    # destroy the newly formed bubbles.
-                    self.bullet.update(delta_t * 5)
-                spawned_bubbles, spawned_powerups = b.spawn()
-                self.bubbles.extend(spawned_bubbles)
-                self.powerups.extend(spawned_powerups)
-                self.spawn_explosion(b)
-                self.mark_score(b)
-                if not len(self.bubbles):
-                    self.afterfinish_timer = 3
-                break
+            for i in range(len(self.bullets) - 1, -1, -1):
+                if self.bullets[i].collides_with(b):
+                    self.bubbles.remove(b)
+                    if self.ship != None and not self.ship.has_super_bullets():
+                        del self.bullets[i] # delete the non-super bullet when it hits a bubble
+                    else:
+                        # Push it along or it will just
+                        # destroy the newly formed bubbles.
+                        self.bullets[i].update(delta_t * 5)
+                    spawned_bubbles, spawned_powerups = b.spawn()
+                    self.bubbles.extend(spawned_bubbles)
+                    self.powerups.extend(spawned_powerups)
+                    self.spawn_explosion(b)
+                    self.mark_score(b)
+                    if not len(self.bubbles):
+                        self.afterfinish_timer = 3
+                    break
 
             # check if the bubble has hit the ship
             if self.ship != None and b.collides_with(self.ship) and not self.ship.has_shield():
@@ -575,8 +576,8 @@ class GameScreen:
 
         if self.world.ship != None:
             self.world.ship.render(self.screen)
-        if self.world.bullet != None:
-            self.world.bullet.render(self.screen)
+        for bullet in self.world.bullets:
+            bullet.render(self.screen)
 
         for bubble in self.world.bubbles:
             bubble.render(self.screen)
@@ -633,8 +634,8 @@ while True:
         # on mouse down, fire a bullet and start the thruster of the ship
         if (world.level > 0) and (world.ship != None) and (not renderer.game_paused):
             x, y = ev.pos
-            if world.bullet == None:
-                world.bullet = world.ship.shoot_at(x / float(MAP_WIDTH), y / float(MAP_HEIGHT))[0]
+            if len(world.bullets) < 5:
+                world.bullets.extend(world.ship.shoot_at(x / float(MAP_WIDTH), y / float(MAP_HEIGHT)))
             world.ship.thrust_at(x / float(MAP_WIDTH), y / float(MAP_HEIGHT))
     elif ev.type == pygame.MOUSEBUTTONUP:
         # on mouse up, stop accelerating the ship
