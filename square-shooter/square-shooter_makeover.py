@@ -262,32 +262,40 @@ class Ship(ObjectOnMap):
         self._shield_timer += secs
 
     def has_shield(self):
-        """Returns True if this ship currently has a shield, False if it does not have a shield."""
-        return self._shield_timer > 0
+        """Returns number of seconds of shield time left."""
+        if self._shield_timer < 0:
+            self._shield_timer = 0
+        return self._shield_timer
 
     def add_super_bullets(self, secs=6):
         """Extends the time on the ship's super bullets by secs seconds."""
         self._super_bullet_timer += secs
 
     def has_super_bullets(self):
-        """Returns True if this ship currently has a super bullets, False if it does not have a super bullets."""
-        return self._super_bullet_timer > 0
+        """Returns number of seconds of super bullets time left."""
+        if self._super_bullet_timer < 0:
+            self._super_bullet_timer = 0
+        return self._super_bullet_timer
 
     def add_freeze(self, secs=6):
         """Extends the time on the ship's freeze powerup by secs seconds."""
         self._freeze_timer += secs
 
     def has_freeze(self):
-        """Returns True if this ship currently has a freeze powerup, False if it does not have a shield."""
-        return self._freeze_timer > 0
+        """Returns number of seconds of freeze time left."""
+        if self._freeze_timer < 0:
+            self._freeze_timer = 0
+        return self._freeze_timer
 
     def add_shotgun(self, secs=6):
         """Extends the time on the ship's shotgun powerup by secs seconds."""
         self._shotgun_timer += secs
 
     def has_shotgun(self):
-        """Returns True if this ship currently has a shotgun powerup, False if it does not have a shield."""
-        return self._shotgun_timer > 0
+        """Returns number of seconds of shotgun time left."""
+        if self._shotgun_timer < 0:
+            self._shotgun_timer = 0
+        return self._shotgun_timer
 
     def shoot_at(self, x, y):
         """Returns a list of bullet objects that were created by the Ship."""
@@ -553,6 +561,18 @@ class GameScreen:
         self.screen.blit(text, (MAP_WIDTH + 20, 48 * 3))
         text = self.hud_font.render(str(self.world.score), False, BLACK)
         self.screen.blit(text, (MAP_WIDTH + 20, 48 * 5))
+
+        text_y = 48 * 6
+        if self.world.ship:
+            powerup_status = ((self.world.ship.has_shield(), 'Shield ' + str(int(self.world.ship.has_shield()))),
+                              (self.world.ship.has_super_bullets(), 'Super Bullet ' + str(int(self.world.ship.has_super_bullets()))),
+                              (self.world.ship.has_freeze(), 'Freeze ' + str(int(self.world.ship.has_freeze()))),
+                              (self.world.ship.has_shotgun(), 'Shotgun ' + str(int(self.world.ship.has_shotgun()))))
+            for seconds_left, text in powerup_status:
+                if seconds_left:
+                    text = self.msg_font.render(text, False, BLACK)
+                    self.screen.blit(text, (MAP_WIDTH + 20, text_y))
+                    text_y += 25
 
         if DISPLAY_FPS:
             fps_text = self.msg_font.render(str(self.fps), False, GREEN)
