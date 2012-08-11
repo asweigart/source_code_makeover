@@ -1,6 +1,6 @@
 ###########################################
 ## Game by Logi540                       ##
-## Art from www.spriters-resource.com    ##
+## Art from www.spriters - resource.com    ##
 ## Music from www.the soundbible.com     ##
 ## Run only in SPE                       ##
 ###########################################
@@ -24,24 +24,24 @@ class Sidebar():
     def __init__(self):
         self.font = pygame.font.Font(None, 22)
         self.gems = 0
-        self.gemsText = self.font.render(str(self.gems)+" gems", 1, lightGrey)
+        self.gemsText = self.font.render(str(self.gems) + " gems", 1, lightGrey)
         self.spells = pygame.sprite.Group()
-        spell = spellIcon(pygame.image.load("images/fireballIcon.bmp"), 100, 360+30, 5, castFireBall, 1)
+        spell = SpellIcon(pygame.image.load("images/fireballIcon.bmp"), 100, 360 + 30, 5, castFireBall, 1)
         self.spells.add(spell)
-        spell = spellIcon(pygame.image.load("images/whirlwindIcon.bmp"), 170, 360+31, 8, castWhirlWind, 2)
+        spell = SpellIcon(pygame.image.load("images/whirlwindIcon.bmp"), 170, 360 + 31, 8, castWhirlWind, 2)
         self.spells.add(spell)
-        spell = spellIcon(pygame.image.load("images/ghostIcon.bmp"), 240, 360+30, 10, castGhost, 3)
+        spell = SpellIcon(pygame.image.load("images/ghostIcon.bmp"), 240, 360 + 30, 10, castGhost, 3)
         self.spells.add(spell)
-        self.logo = logo(pygame.image.load("images/logo.bmp"), 360, 360+10)
+        self.logo = logo(pygame.image.load("images/logo.bmp"), 360, 360 + 10)
     def draw(self):
-        pygame.draw.rect(screen, black, [0, 360, size[0], size[1]-360])
-        screen.blit(self.gemsText, [10, 360+20])
+        pygame.draw.rect(screen, black, [0, 360, size[0], size[1] - 360])
+        screen.blit(self.gemsText, [10, 360 + 20])
         for spell in self.spells:
             spell.draw()
         self.logo.draw()
     def addGems(self, amount):
         self.gems += amount
-        self.gemsText = self.font.render(str(self.gems)+" gems", 1, lightGrey)
+        self.gemsText = self.font.render(str(self.gems) + " gems", 1, lightGrey)
 
 class MySprite(pygame.sprite.Sprite):
     def __init__(self, target):
@@ -66,7 +66,7 @@ class MySprite(pygame.sprite.Sprite):
         self.frame_height = height
         self.rect = 0, 0, width, height
         self.columns = columns
-        #try to auto-calculate total frames
+        #try to auto - calculate total frames
         rect = self.master_image.get_rect()
         self.last_frame = (rect.width // width) * (rect.height // height) - 1
     def update(self, current_time, rate=30):
@@ -104,18 +104,18 @@ class Monster(MySprite):
         if move:
             self.rect.left += self.speed
             screen.blit(self.image, self.rect)
-            pygame.draw.rect(screen, black, [self.rect.left, self.rect.top-20, self.whole_life*10, 14])
-            pygame.draw.rect(screen, red, [self.rect.left, self.rect.top-20, self.life*10, 14])
+            pygame.draw.rect(screen, black, [self.rect.left, self.rect.top - 20, self.whole_life * 10, 14])
+            pygame.draw.rect(screen, red, [self.rect.left, self.rect.top - 20, self.life * 10, 14])
             if self.rect.left >= size[0]:
                 gameover = True
     def kill(self):
         if self.life == 1 and self in monsters:
             monsters.remove(self)
-            gemChance = ((self.speed * 2) + self.whole_life)*3
+            gemChance = ((self.speed * 2) + self.whole_life) * 3
             if random.randint(1, 100)<gemChance:
                 gem = copy.copy(gemTemplate)
                 gem.update(1, False)
-                gem.set_rect(random.randint(self.rect.left-10, self.rect.left+10), random.randint(self.rect.top-10, self.rect.top+10))
+                gem.set_rect(random.randint(self.rect.left - 10, self.rect.left + 10), random.randint(self.rect.top - 10, self.rect.top + 10))
                 gems.add(copy.copy(gem))
         else:
             self.life -= 1
@@ -130,7 +130,7 @@ class Gem(MySprite):
     def remove(self):
         gems.remove_internal(self)
 
-class spellIcon(pygame.sprite.Sprite):
+class SpellIcon(pygame.sprite.Sprite):
     def __init__(self, image, x, y, cost, action, hotKey):
         pygame.sprite.Sprite.__init__(self)
         self.image = image
@@ -141,12 +141,12 @@ class spellIcon(pygame.sprite.Sprite):
         self.action = action
         self.cost = cost
         font = pygame.font.Font(None, 14)
-        self.costText = font.render("Cost: "+str(self.cost)+" gems", 1, lightGrey)
-        self.hotKeyText = font.render("Hot Key: "+str(hotKey), 1, lightGrey)
+        self.costText = font.render("Cost: " + str(self.cost) + " gems", 1, lightGrey)
+        self.hotKeyText = font.render("Hot Key: " + str(hotKey), 1, lightGrey)
     def draw(self):
         screen.blit(self.image, self.rect)
-        screen.blit(self.costText, [self.rect.left, self.rect.bottom+10])
-        screen.blit(self.hotKeyText, [self.rect.left, self.rect.bottom+25])
+        screen.blit(self.costText, [self.rect.left, self.rect.bottom + 10])
+        screen.blit(self.hotKeyText, [self.rect.left, self.rect.bottom + 25])
 
 class logo(pygame.sprite.Sprite):
     def __init__(self, image, x, y):
@@ -172,21 +172,21 @@ def castFireBall():
     fireballSound.play()
     for fireball in fireballsOff:
         fireballsOff.remove(fireball)
-        fireball.set_rect(random.randint(30, size[0]-30), -10)
+        fireball.set_rect(random.randint(30, size[0] - 30), -10)
         fireballs.add(fireball)
 
 def castWhirlWind():
     whirlwindSound.play()
     for whirlwind in whirlwindsOff:
         whirlwindsOff.remove(whirlwind)
-        whirlwind.set_rect(size[0]+20, random.randint(30, size[1]-30-sidebarLength))
+        whirlwind.set_rect(size[0] + 20, random.randint(30, size[1] - 30 - sidebarLength))
         whirlwinds.add(whirlwind)
 
 def castGhost():
     ghostSound.play()
     for ghost in ghostsOff:
         ghostsOff.remove(ghost)
-        ghost.set_rect(-10, random.randint(30, size[1]-30-sidebarLength))
+        ghost.set_rect( - 10, random.randint(30, size[1] - 30 - sidebarLength))
         ghosts.add(ghost)
 
 # Define some colors
@@ -201,7 +201,7 @@ pygame.init()
 
 # Set the height and width of the screen
 sidebarLength = 120
-size=[600, 360+sidebarLength]
+size=[600, 360 + sidebarLength]
 screen=pygame.display.set_mode(size)
 pygame.display.set_caption("Demon Kingdom")
 
@@ -226,7 +226,7 @@ level4Text = font.render("Level IV - The Demon's Home", 1, black)
 level5Text = font.render("Level V - The Desert", 1, black)
 level6Text = font.render("Level VI - The Caves of the Demon Lord", 1, black)
 introText1 = font.render("(click anywhere to skip)", 1, lightGrey)
-introText2 = font.render("The Demon of Gar-noth has risen.", 1, lightGrey)
+introText2 = font.render("The Demon of Gar - noth has risen.", 1, lightGrey)
 introText3 = font.render("The whole land is in danger!", 1, lightGrey)
 introText4 = font.render("You must defeat the demon and his forces.", 1, lightGrey)
 helpText1  = font.render("(click anywhere to skip)", 1, lightGrey)
@@ -234,15 +234,15 @@ helpText2  = font.render("Click on creature to attack them.", 1, lightGrey)
 helpText3  = font.render("Collect gems to cast spells.", 1, lightGrey)
 helpText4  = font.render("To cast a spell either click the icon", 1, lightGrey)
 helpText5  = font.render("or use their hot keys:", 1, lightGrey)
-helpText6  = font.render("1-Fireball, 2-Whirlwind, 3-Summon Ghost.", 1, lightGrey)
+helpText6  = font.render("1 - Fireball, 2 - Whirlwind, 3 - Summon Ghost.", 1, lightGrey)
 helpText7  = font.render("Don't let any of the monsters get off", 1, lightGrey)
 helpText8  = font.render("the egde of the screen.", 1, lightGrey)
 doneText1 = font.render("(click anywhere to skip)", 1, lightGrey)
-doneText2 = font.render("You have defeated The Demon of Gar-noth!", 1, lightGrey)
+doneText2 = font.render("You have defeated The Demon of Gar - noth!", 1, lightGrey)
 doneText3 = font.render("His forces are destored.", 1, lightGrey)
 doneText4 = font.render("But you know the land is still in danger...", 1, lightGrey)
 doneText5 = font.render("The Demon Lord has heard about the defeat", 1, lightGrey)
-doneText6 = font.render("of The Demon of Gar-noth.", 1, lightGrey)
+doneText6 = font.render("of The Demon of Gar - noth.", 1, lightGrey)
 doneText7 = font.render("Knowing this you set out to the land of demons.", 1, lightGrey)
 doneText8 = font.render("To once and for all destory the demons.", 1, lightGrey)
 done2Text1 = font.render("(click anywhere to skip)", 1, lightGrey)
@@ -288,7 +288,7 @@ for i in range(random.randint(10, 20)):
     m = Monster(screen)
     m.load(stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
     m.update(1, False)
-    m.set_rect(random.randint(-500, -1), random.randint(25, size[1]-70-sidebarLength))
+    m.set_rect(random.randint( - 500, -1), random.randint(25, size[1] - 70 - sidebarLength))
     m.set_speed(stats[type]["speed"])
     m.set_life(stats[type]["life"])
     monsters1.add(m)
@@ -308,7 +308,7 @@ for i in range(10):
     m = Monster(screen)
     m.load(stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
     m.update(1, False)
-    m.set_rect(random.randint(max, min), random.randint(25, size[1]-85-sidebarLength))
+    m.set_rect(random.randint(max, min), random.randint(25, size[1] - 85 - sidebarLength))
     m.set_speed(stats[type]["speed"])
     m.set_life(stats[type]["life"])
     finalWave.add(m)
@@ -320,7 +320,7 @@ for i in range(random.randint(35, 40)):
     m = Monster(screen)
     m.load(stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
     m.update(1, False)
-    m.set_rect(random.randint(-550, -1), random.randint(25, size[1]-70-sidebarLength))
+    m.set_rect(random.randint( - 550, -1), random.randint(25, size[1] - 70 - sidebarLength))
     m.set_speed(stats[type]["speed"])
     m.set_life(stats[type]["life"])
     monsters2.add(m)
@@ -344,7 +344,7 @@ for i in range(21):
     m = Monster(screen)
     m.load(stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
     m.update(1, False)
-    m.set_rect(random.randint(max, min), random.randint(25, size[1]-85-sidebarLength))
+    m.set_rect(random.randint(max, min), random.randint(25, size[1] - 85 - sidebarLength))
     m.set_speed(stats[type]["speed"])
     m.set_life(stats[type]["life"])
     finalWave2.add(m)
@@ -356,7 +356,7 @@ for i in range(random.randint(25, 30)):
     m = Monster(screen)
     m.load(stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
     m.update(1, False)
-    m.set_rect(random.randint(-650, -1), random.randint(25, size[1]-70-sidebarLength))
+    m.set_rect(random.randint( - 650, -1), random.randint(25, size[1] - 70 - sidebarLength))
     m.set_speed(stats[type]["speed"])
     m.set_life(stats[type]["life"])
     monsters3.add(m)
@@ -376,7 +376,7 @@ for i in range(21):
     m = Monster(screen)
     m.load(stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
     m.update(1, False)
-    m.set_rect(random.randint(max, min), random.randint(25, size[1]-85-sidebarLength))
+    m.set_rect(random.randint(max, min), random.randint(25, size[1] - 85 - sidebarLength))
     m.set_speed(stats[type]["speed"])
     m.set_life(stats[type]["life"])
     finalWave3.add(m)
@@ -388,7 +388,7 @@ for i in range(random.randint(45, 65)):
     m = Monster(screen)
     m.load(stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
     m.update(1, False)
-    m.set_rect(random.randint(-1000, -1), random.randint(25, size[1]-70-sidebarLength))
+    m.set_rect(random.randint( - 1000, -1), random.randint(25, size[1] - 70 - sidebarLength))
     m.set_speed(stats[type]["speed"])
     m.set_life(stats[type]["life"])
     monsters4.add(m)
@@ -420,7 +420,7 @@ for i in range(21):
     m = Monster(screen)
     m.load(stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
     m.update(1, False)
-    m.set_rect(random.randint(max, min), random.randint(25, size[1]-85-sidebarLength))
+    m.set_rect(random.randint(max, min), random.randint(25, size[1] - 85 - sidebarLength))
     m.set_speed(stats[type]["speed"])
     m.set_life(stats[type]["life"])
     finalWave4.add(m)
@@ -432,7 +432,7 @@ for i in range(random.randint(12, 16)):
     m = Monster(screen)
     m.load(stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
     m.update(1, False)
-    m.set_rect(random.randint(-550, -1), random.randint(25, size[1]-70-sidebarLength))
+    m.set_rect(random.randint( - 550, -1), random.randint(25, size[1] - 70 - sidebarLength))
     m.set_speed(stats[type]["speed"])
     m.set_life(stats[type]["life"])
     monsters5.add(m)
@@ -452,7 +452,7 @@ for i in range(12):
     m = Monster(screen)
     m.load(stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
     m.update(1, False)
-    m.set_rect(random.randint(max, min), random.randint(25, size[1]-85-sidebarLength))
+    m.set_rect(random.randint(max, min), random.randint(25, size[1] - 85 - sidebarLength))
     m.set_speed(stats[type]["speed"])
     m.set_life(stats[type]["life"])
     finalWave5.add(m)
@@ -464,7 +464,7 @@ for i in range(random.randint(38, 43)):
     m = Monster(screen)
     m.load(stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
     m.update(1, False)
-    m.set_rect(random.randint(-2000, -1), random.randint(25, size[1]-70-sidebarLength))
+    m.set_rect(random.randint( - 2000, -1), random.randint(25, size[1] - 70 - sidebarLength))
     m.set_speed(stats[type]["speed"])
     m.set_life(stats[type]["life"])
     monsters6.add(m)
@@ -473,11 +473,11 @@ for i in range(15):
         type = "bat"
         min = -1
         max = -100
-    elif i-8 <= 0:
+    elif i - 8 <= 0:
         type = "skeleton"
         min = -1
         max = -100
-    elif i-11 <= 0:
+    elif i - 11 <= 0:
         type = "ogre"
         min = -20
         max = -80
@@ -492,7 +492,7 @@ for i in range(15):
     m = Monster(screen)
     m.load(stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
     m.update(1, False)
-    m.set_rect(random.randint(max, min), random.randint(25, size[1]-85-sidebarLength))
+    m.set_rect(random.randint(max, min), random.randint(25, size[1] - 85 - sidebarLength))
     m.set_speed(stats[type]["speed"])
     m.set_life(stats[type]["life"])
     finalWave6.add(m)
@@ -513,7 +513,7 @@ effect = spellEffect(screen)
 effect.load("whirlwindSpell.bmp", 29, 32, 2)
 effect.update(1, False)
 effect.set_rect(0, 0)
-effect.set_speed([-10, 0])
+effect.set_speed([ - 10, 0])
 whirlwindsOff.add(effect)
 
 ghosts = pygame.sprite.Group()
@@ -536,7 +536,7 @@ def draw():
         gem.update(time)
     for fireball in fireballs:
         fireball.update(time)
-        if fireball.rect.bottom >= size[1]-sidebarLength-5:
+        if fireball.rect.bottom >= size[1] - sidebarLength - 5:
             fireballs.remove(fireball)
             fireballsOff.add(fireball)
         hits = pygame.sprite.spritecollide(fireball, monsters, False)
@@ -560,7 +560,7 @@ def draw():
                         hit.kill()
     for ghost in ghosts:
         ghost.update(time)
-        if ghost.rect.left >= size[0]-5:
+        if ghost.rect.left >= size[0] - 5:
             ghosts.remove(ghost)
             ghostsOff.add(ghost)
         hits = pygame.sprite.spritecollide(ghost, monsters, False)
@@ -570,7 +570,7 @@ def draw():
     pygame.display.flip()
 
 introdone = False
-y = size[1]+26*3+5
+y = size[1] + 26 * 3 + 5
 while introdone == False:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -578,9 +578,9 @@ while introdone == False:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             introdone = True
     screen.fill(black)
-    screen.blit(introText1, [10, y-26*3-5])
-    screen.blit(introText2, [10, y-26*2])
-    screen.blit(introText3, [10, y-26])
+    screen.blit(introText1, [10, y - 26 * 3 - 5])
+    screen.blit(introText2, [10, y - 26 * 2])
+    screen.blit(introText3, [10, y - 26])
     screen.blit(introText4, [10, y])
     if y <= 0:
         introdone = True
@@ -588,7 +588,7 @@ while introdone == False:
     y -= 1
     clock.tick(20)
 instructionsdone = False
-y = size[1]+26*7+5
+y = size[1] + 26 * 7 + 5
 while instructionsdone == False:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -596,13 +596,13 @@ while instructionsdone == False:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             instructionsdone = True
     screen.fill(black)
-    screen.blit(helpText1, [10, y-26*7-5])
-    screen.blit(helpText2, [10, y-26*6])
-    screen.blit(helpText3, [10, y-26*5])
-    screen.blit(helpText4, [10, y-26*4])
-    screen.blit(helpText5, [10, y-26*3])
-    screen.blit(helpText6, [10, y-26*2])
-    screen.blit(helpText7, [10, y-26])
+    screen.blit(helpText1, [10, y - 26 * 7 - 5])
+    screen.blit(helpText2, [10, y - 26 * 6])
+    screen.blit(helpText3, [10, y - 26 * 5])
+    screen.blit(helpText4, [10, y - 26 * 4])
+    screen.blit(helpText5, [10, y - 26 * 3])
+    screen.blit(helpText6, [10, y - 26 * 2])
+    screen.blit(helpText7, [10, y - 26])
     screen.blit(helpText8, [10, y])
     if y <= 0:
         instructionsdone = True
@@ -616,7 +616,7 @@ screen.blit(level1Text, [10, 10])
 pygame.display.flip()
 pygame.time.delay(1750)
 monsters = monsters1
-# -------- Main Program Loop -----------
+# - - -- - --- Main Program Loop - - -- - -- - ---
 while done==False and gameover==False:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -624,15 +624,15 @@ while done==False and gameover==False:
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_1:
                 if sidebar.gems >= 5:
-                    sidebar.addGems(-5)
+                    sidebar.addGems( - 5)
                     castFireBall()
             elif event.key == pygame.K_2:
                 if sidebar.gems >= 8:
-                    sidebar.addGems(-8)
+                    sidebar.addGems( - 8)
                     castWhirlWind()
             elif event.key == pygame.K_3:
                 if sidebar.gems >= 10:
-                    sidebar.addGems(-10)
+                    sidebar.addGems( - 10)
                     castGhost()
     if pygame.mouse.get_pressed()[0] == 1:
         if mouseLastDown == False:
@@ -648,7 +648,7 @@ while done==False and gameover==False:
             for spell in sidebar.spells:
                 if spell.rect.collidepoint(pygame.mouse.get_pos()):
                     if sidebar.gems >= spell.cost:
-                        sidebar.addGems(-1*spell.cost)
+                        sidebar.addGems( - 1 * spell.cost)
                         spell.action()
         mouseLastDown = True
     else:
@@ -723,7 +723,7 @@ while done==False and gameover==False:
                 monsters = finalWave4
             else:
                 viewDone = False
-                y = size[1]+27*6+5
+                y = size[1] + 27 * 6 + 5
                 while viewDone == False:
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
@@ -731,13 +731,13 @@ while done==False and gameover==False:
                         elif event.type == pygame.MOUSEBUTTONDOWN:
                             viewDone = True
                     screen.fill(black)
-                    screen.blit(doneText1, [10, y-26*7-5])
-                    screen.blit(doneText2, [10, y-26*6])
-                    screen.blit(doneText3, [10, y-26*5])
-                    screen.blit(doneText4, [10, y-26*4])
-                    screen.blit(doneText5, [10, y-26*3])
-                    screen.blit(doneText6, [10, y-26*2])
-                    screen.blit(doneText7, [10, y-26])
+                    screen.blit(doneText1, [10, y - 26 * 7 - 5])
+                    screen.blit(doneText2, [10, y - 26 * 6])
+                    screen.blit(doneText3, [10, y - 26 * 5])
+                    screen.blit(doneText4, [10, y - 26 * 4])
+                    screen.blit(doneText5, [10, y - 26 * 3])
+                    screen.blit(doneText6, [10, y - 26 * 2])
+                    screen.blit(doneText7, [10, y - 26])
                     screen.blit(doneText8, [10, y])
                     if y <= 0:
                         viewDone = True
@@ -781,7 +781,7 @@ while done==False and gameover==False:
                 monsters = finalWave6
             else:
                 viewDone = False
-                y = size[1]+27*2+5
+                y = size[1] + 27 * 2 + 5
                 while viewDone == False:
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
@@ -789,8 +789,8 @@ while done==False and gameover==False:
                         elif event.type == pygame.MOUSEBUTTONDOWN:
                             viewDone = True
                     screen.fill(black)
-                    screen.blit(done2Text1, [10, y-26*2-5])
-                    screen.blit(done2Text2, [10, y-26])
+                    screen.blit(done2Text1, [10, y - 26 * 2 - 5])
+                    screen.blit(done2Text2, [10, y - 26])
                     screen.blit(done2Text3, [10, y])
                     if y <= 0:
                         viewDone = True
@@ -803,7 +803,7 @@ while done==False and gameover==False:
     if random.randint(0, 150) == 150:
         gem = copy.copy(gemTemplate)
         gem.update(1, False)
-        gem.set_rect(random.randint(20, size[1]-20), random.randint(36, size[1]-36-sidebarLength))
+        gem.set_rect(random.randint(20, size[1] - 20), random.randint(36, size[1] - 36 - sidebarLength))
         gems.add(copy.copy(gem))
 
     draw()
