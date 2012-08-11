@@ -175,7 +175,7 @@ class Powerup(ObjectOnMap):
     def __init__(self, pos):
         super(Powerup, self).__init__(0.03) # all Powerups are the same size.
         self.pos.copy(pos)
-        self.kind = random.choice(("shield", "bullet", "freeze"))
+        self.kind = random.choice(("shield", "bullet", "freeze", "shotgun"))
         self.age = 0
 
     def render(self, surface):
@@ -207,6 +207,11 @@ class Powerup(ObjectOnMap):
             pygame.draw.rect(surface, WHITE, bbox, 1)
             bbox.inflate_ip(-scaled_r * 0.5, -scaled_r * 0.5)
             pygame.draw.rect(surface, WHITE, bbox, 1)
+        elif self.kind == "shotgun":
+            bbox = pygame.Rect(0, 0, scaled_r * 2, scaled_r * 2)
+            bbox.center = (scaled_x, scaled_y)
+            pygame.draw.rect(surface, WHITE, bbox, 1)
+            pygame.draw.line(surface, WHITE, bbox.midleft, bbox.midright, 1)
         else:
             raise "Bad power-up kind: " + self.kind
 
@@ -217,6 +222,7 @@ class Ship(ObjectOnMap):
         self._shield_timer = 0
         self._super_bullet_timer = 0
         self._freeze_timer = 0
+        self._shotgun_timer = 0
         self.accel_x = 0 # acceleration rate of the ship
         self.accel_y = 0
 
@@ -245,6 +251,7 @@ class Ship(ObjectOnMap):
         if self.has_shield():        self._shield_timer       -= delta_t
         if self.has_super_bullets(): self._super_bullet_timer -= delta_t
         if self.has_freeze():        self._freeze_timer       -= delta_t
+        if self.has_shotgun():       self._shotgun_timer      -= delta_t
 
         super(Ship, self).update(delta_t)
 
@@ -272,24 +279,41 @@ class Ship(ObjectOnMap):
         """Returns True if this ship currently has a freeze powerup, False if it does not have a shield."""
         return self._freeze_timer > 0
 
+    def add_shotgun(self, secs=6):
+        """Extends the time on the ship's shotgun powerup by secs seconds."""
+        self._shotgun_timer += secs
+
+    def has_shotgun(self):
+        """Returns True if this ship currently has a shotgun powerup, False if it does not have a shield."""
+        return self._shotgun_timer > 0
+
     def shoot_at(self, x, y):
         """Returns a list of bullet objects that were created by the Ship."""
         x -= self.pos.x;
         y -= self.pos.y;
 
-        b = Bullet()
-        b.pos.copy(self.pos);
-        b.speed.x = x * 3
-        b.speed.y = y * 3
+        bullets = []
+        for i in range(5):
+            b = Bullet()
+            b.pos.copy(self.pos);
+            b.speed.x = x * 3
+            b.speed.y = y * 3
 
-        # Help out the poor sods who click on their
-        # own ship and get stuck with a non-moving
-        # bullet. (2009-11-14)
-        if abs(x) < 0.1 and abs(y) < 0.1:
-            b.speed.x *= 30
-            b.speed.y *= 30
+            # Help out the poor sods who click on their
+            # own ship and get stuck with a non-moving
+            # bullet. (2009-11-14)
+            if abs(x) < 0.1 and abs(y) < 0.1:
+                b.speed.x *= 30
+                b.speed.y *= 30
 
-        return [b]
+            if not self.has_shotgun():
+                return [b] # just return the one bullet
+
+            b.speed.x += random.uniform(-0.15, 0.15)
+            b.speed.y += random.uniform(-0.15, 0.15)
+
+            bullets.append(b)
+        return bullets
 
     def render(self, surface):
         bbox = pygame.draw.circle(
@@ -481,10 +505,11 @@ class GameWorld:
             self.high_score = self.score
 
     def apply_powerup(self, powerup):
-        #                  function to call
-        kinds = {'shield': self.ship.add_shield,
-                 'bullet': self.ship.add_super_bullets,
-                 'freeze': self.ship.add_freeze}
+        #                   function to call
+        kinds = {'shield':  self.ship.add_shield,
+                 'bullet':  self.ship.add_super_bullets,
+                 'freeze':  self.ship.add_freeze,
+                 'shotgun': self.ship.add_shotgun}
         kinds[powerup.kind]()
 
         self.score += self.level * 10
@@ -634,7 +659,7 @@ while True:
         # on mouse down, fire a bullet and start the thruster of the ship
         if (world.level > 0) and (world.ship != None) and (not renderer.game_paused):
             x, y = ev.pos
-            if len(world.bullets) < 5:
+            if len(world.bullets) < 6:
                 world.bullets.extend(world.ship.shoot_at(x / float(MAP_WIDTH), y / float(MAP_HEIGHT)))
             world.ship.thrust_at(x / float(MAP_WIDTH), y / float(MAP_HEIGHT))
     elif ev.type == pygame.MOUSEBUTTONUP:
