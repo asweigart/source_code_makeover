@@ -38,7 +38,7 @@ class Sidebar():
     def __init__(self):
         self.font = pygame.font.Font(None, 22)
         self.numGemsCache = numGems
-        self.gemsText = self.font.render(str(numGems) + " gems", 1, lightGrey)
+        self.gemsText = self.font.render(str(numGems) + " gems", 1, LIGHT_GRAY)
         self.spells = pygame.sprite.Group()
 
         #          image filename,      x,   y,               cost, function,    hotkey
@@ -55,9 +55,9 @@ class Sidebar():
     def draw(self):
         if self.numGemsCache != numGems:
             # update the "X gems" text Surface object
-            self.gemsText = self.font.render(str(numGems) + " gems", 1, lightGrey)
+            self.gemsText = self.font.render(str(numGems) + " gems", 1, LIGHT_GRAY)
 
-        pygame.draw.rect(screen, black, [0, 360, WINDOW_WIDTH, WINDOW_HEIGHT - 360])
+        pygame.draw.rect(screen, BLACK, [0, 360, WINDOW_WIDTH, WINDOW_HEIGHT - 360])
         screen.blit(self.gemsText, [10, 360 + 20])
 
         for spell in self.spells:
@@ -66,38 +66,36 @@ class Sidebar():
         self.logo.draw()
 
 
-class MySprite(pygame.sprite.Sprite):
-    def __init__(self, target):
+class AnimatedSprite(pygame.sprite.Sprite):
+    def __init__(self, target, filename, width, height, columns):
         pygame.sprite.Sprite.__init__(self) #extend the base Sprite class
         self.target_surface = target
-        self.image = None
-        self.master_image = None
-        self.rect = None
-        self.topleft = 0, 0
-        self.frame = 0
-        self.old_frame = -1
-        self.frame_width = 1
-        self.frame_height = 1
-        self.first_frame = 0
-        self.last_frame = 0
-        self.columns = 1
-        self.last_time = 0
-    def load(self, filename, width, height, columns):
+        self.image = None # the current animation frame to be displayed
+
+        # the single image file that contains all the sprites of this animation
         self.master_image = pygame.image.load('images/' + filename)
-        self.master_image.set_colorkey(white, pygame.RLEACCEL)
+        self.master_image.set_colorkey(WHITE, pygame.RLEACCEL)
+
+        self.rect = 0, 0, width, height
+        self.topleft = 0, 0
+        self.frame = 0 # the current frame number to be displayed
+        self.old_frame = -1 # the previously shown frame
         self.frame_width = width
         self.frame_height = height
-        self.rect = 0, 0, width, height
-        self.columns = columns
+
         #try to auto - calculate total frames
         rect = self.master_image.get_rect()
         self.last_frame = (rect.width // width) * (rect.height // height) - 1
+
+        self.columns = columns
+        self.last_time = 0
+
     def update(self, current_time, rate=30):
         #update animation frame number
         if current_time > self.last_time + rate:
             self.frame += 1
             if self.frame > self.last_frame:
-                self.frame = self.first_frame
+                self.frame = 0
             self.last_time = current_time
         #build current frame only if it changed
         if self.frame != self.old_frame:
@@ -106,16 +104,18 @@ class MySprite(pygame.sprite.Sprite):
             rect = ( frame_x, frame_y, self.frame_width, self.frame_height )
             self.image = self.master_image.subsurface(rect)
             self.old_frame = self.frame
+
     def set_rect(self, x, y):
         self.rect = self.image.get_rect()
         self.rect.top = y
         self.rect.left = x
+
     def __str__(self):
-        return str(self.frame) + ", " + str(self.first_frame) + \
+        return str(self.frame) + ", 0" + \
         ", " + str(self.last_frame) + ", " + str(self.frame_width) + \
         ", " + str(self.frame_height) + ", " + str(self.columns)
 
-class Monster(MySprite):
+class Monster(AnimatedSprite):
     def set_speed(self, speed):
         self.speed = speed
     def set_life(self, life):
@@ -123,12 +123,12 @@ class Monster(MySprite):
         self.whole_life = life
     def update(self, time, move=True):
         global gameover
-        MySprite.update(self, time)
+        AnimatedSprite.update(self, time)
         if move:
             self.rect.left += self.speed
             screen.blit(self.image, self.rect)
-            pygame.draw.rect(screen, black, [self.rect.left, self.rect.top - 20, self.whole_life * 10, 14])
-            pygame.draw.rect(screen, red, [self.rect.left, self.rect.top - 20, self.life * 10, 14])
+            pygame.draw.rect(screen, BLACK, [self.rect.left, self.rect.top - 20, self.whole_life * 10, 14])
+            pygame.draw.rect(screen, RED, [self.rect.left, self.rect.top - 20, self.life * 10, 14])
             if self.rect.left >= WINDOW_WIDTH:
                 gameover = True
     def kill(self):
@@ -143,29 +143,32 @@ class Monster(MySprite):
         else:
             self.life -= 1
 
-class Gem(MySprite):
-    def load(self):
-        MySprite.load(self, "gems.bmp", 18, 32, 6)
+class Gem(AnimatedSprite):
+    def __init__(self, target):
+        super(Gem, self).__init__(target, 'gems.bmp', 18, 32, 6)
+
     def update(self, time, move=True):
-        MySprite.update(self, time)
+        AnimatedSprite.update(self, time)
         if move:
             screen.blit(self.image, self.rect)
+
     def remove(self):
         gems.remove_internal(self)
+
 
 class SpellIcon(pygame.sprite.Sprite):
     def __init__(self, image, x, y, cost, action, hotKey):
         pygame.sprite.Sprite.__init__(self)
         self.image = image
-        self.image.set_colorkey(white, pygame.RLEACCEL)
+        self.image.set_colorkey(WHITE, pygame.RLEACCEL)
         self.rect = image.get_rect()
         self.rect.left = x
         self.rect.top = y
         self.action = action
         self.cost = cost
         font = pygame.font.Font(None, 14)
-        self.costText = font.render("Cost: " + str(self.cost) + " gems", 1, lightGrey)
-        self.hotKeyText = font.render("Hot Key: " + str(hotKey), 1, lightGrey)
+        self.costText = font.render("Cost: " + str(self.cost) + " gems", 1, LIGHT_GRAY)
+        self.hotKeyText = font.render("Hot Key: " + str(hotKey), 1, LIGHT_GRAY)
     def draw(self):
         screen.blit(self.image, self.rect)
         screen.blit(self.costText, [self.rect.left, self.rect.bottom + 10])
@@ -174,18 +177,18 @@ class SpellIcon(pygame.sprite.Sprite):
 class Logo(pygame.sprite.Sprite):
     def __init__(self, image, x, y):
         self.image = image
-        self.image.set_colorkey(white, pygame.RLEACCEL)
+        self.image.set_colorkey(WHITE, pygame.RLEACCEL)
         self.rect = image.get_rect()
         self.rect.left = x
         self.rect.top = y
     def draw(self):
         screen.blit(self.image, self.rect)
 
-class spellEffect(MySprite):
+class SpellEffect(AnimatedSprite):
     def set_speed(self, speed):
         self.speed = speed
     def update(self, time, move=True):
-        MySprite.update(self, time)
+        AnimatedSprite.update(self, time)
         if move:
             self.rect.left += self.speed[0]
             self.rect.top += self.speed[1]
@@ -213,12 +216,12 @@ def castGhost():
         ghosts.add(ghost)
 
 # Define some colors
-black     = (   0,   0,   0)
-white     = ( 255, 255, 255)
-green     = (   0, 255,   0)
-red       = ( 255,   0,   0)
-blue      = (   0,   0, 255)
-lightGrey = ( 200, 200, 200)
+BLACK      = (   0,   0,   0)
+WHITE      = ( 255, 255, 255)
+GREEN      = (   0, 255,   0)
+RED        = ( 255,   0,   0)
+BLUE       = (   0,   0, 255)
+LIGHT_GRAY = ( 200, 200, 200)
 
 pygame.init()
 
@@ -239,40 +242,40 @@ clock=pygame.time.Clock()
 
 #font
 font = pygame.font.Font(None, 38)
-finalWaveText = font.render("Now for the final wave...", 1, black)
-level1Text = font.render("Level I - The Dungeon of Stone", 1, black)
-level2Text = font.render("Level II - The Field of the Flowers", 1, black)
-level3Text = font.render("Level III - The Ice Lands", 1, black)
-level4Text = font.render("Level IV - The Demon's Home", 1, black)
-level5Text = font.render("Level V - The Desert", 1, black)
-level6Text = font.render("Level VI - The Caves of the Demon Lord", 1, black)
-introText1 = font.render("(click anywhere to skip)", 1, lightGrey)
-introText2 = font.render("The Demon of Gar - noth has risen.", 1, lightGrey)
-introText3 = font.render("The whole land is in danger!", 1, lightGrey)
-introText4 = font.render("You must defeat the demon and his forces.", 1, lightGrey)
-helpText1  = font.render("(click anywhere to skip)", 1, lightGrey)
-helpText2  = font.render("Click on creature to attack them.", 1, lightGrey)
-helpText3  = font.render("Collect gems to cast spells.", 1, lightGrey)
-helpText4  = font.render("To cast a spell either click the icon", 1, lightGrey)
-helpText5  = font.render("or use their hot keys:", 1, lightGrey)
-helpText6  = font.render("1 - Fireball, 2 - Whirlwind, 3 - Summon Ghost.", 1, lightGrey)
-helpText7  = font.render("Don't let any of the monsters get off", 1, lightGrey)
-helpText8  = font.render("the egde of the screen.", 1, lightGrey)
-doneText1 = font.render("(click anywhere to skip)", 1, lightGrey)
-doneText2 = font.render("You have defeated The Demon of Gar - noth!", 1, lightGrey)
-doneText3 = font.render("His forces are destored.", 1, lightGrey)
-doneText4 = font.render("But you know the land is still in danger...", 1, lightGrey)
-doneText5 = font.render("The Demon Lord has heard about the defeat", 1, lightGrey)
-doneText6 = font.render("of The Demon of Gar - noth.", 1, lightGrey)
-doneText7 = font.render("Knowing this you set out to the land of demons.", 1, lightGrey)
-doneText8 = font.render("To once and for all destory the demons.", 1, lightGrey)
-done2Text1 = font.render("(click anywhere to skip)", 1, lightGrey)
-done2Text2 = font.render("Once again you have defeated your enemy!", 1, lightGrey)
-done2Text3 = font.render("You are now the hero of the land!", 1, lightGrey)
-loading = font.render("Loading...", 1, lightGrey)
+finalWaveText = font.render("Now for the final wave...", 1, BLACK)
+level1Text = font.render("Level I - The Dungeon of Stone", 1, BLACK)
+level2Text = font.render("Level II - The Field of the Flowers", 1, BLACK)
+level3Text = font.render("Level III - The Ice Lands", 1, BLACK)
+level4Text = font.render("Level IV - The Demon's Home", 1, BLACK)
+level5Text = font.render("Level V - The Desert", 1, BLACK)
+level6Text = font.render("Level VI - The Caves of the Demon Lord", 1, BLACK)
+introText1 = font.render("(click anywhere to skip)", 1, LIGHT_GRAY)
+introText2 = font.render("The Demon of Gar - noth has risen.", 1, LIGHT_GRAY)
+introText3 = font.render("The whole land is in danger!", 1, LIGHT_GRAY)
+introText4 = font.render("You must defeat the demon and his forces.", 1, LIGHT_GRAY)
+helpText1  = font.render("(click anywhere to skip)", 1, LIGHT_GRAY)
+helpText2  = font.render("Click on creature to attack them.", 1, LIGHT_GRAY)
+helpText3  = font.render("Collect gems to cast spells.", 1, LIGHT_GRAY)
+helpText4  = font.render("To cast a spell either click the icon", 1, LIGHT_GRAY)
+helpText5  = font.render("or use their hot keys:", 1, LIGHT_GRAY)
+helpText6  = font.render("1 - Fireball, 2 - Whirlwind, 3 - Summon Ghost.", 1, LIGHT_GRAY)
+helpText7  = font.render("Don't let any of the monsters get off", 1, LIGHT_GRAY)
+helpText8  = font.render("the egde of the screen.", 1, LIGHT_GRAY)
+doneText1 = font.render("(click anywhere to skip)", 1, LIGHT_GRAY)
+doneText2 = font.render("You have defeated The Demon of Gar - noth!", 1, LIGHT_GRAY)
+doneText3 = font.render("His forces are destored.", 1, LIGHT_GRAY)
+doneText4 = font.render("But you know the land is still in danger...", 1, LIGHT_GRAY)
+doneText5 = font.render("The Demon Lord has heard about the defeat", 1, LIGHT_GRAY)
+doneText6 = font.render("of The Demon of Gar - noth.", 1, LIGHT_GRAY)
+doneText7 = font.render("Knowing this you set out to the land of demons.", 1, LIGHT_GRAY)
+doneText8 = font.render("To once and for all destory the demons.", 1, LIGHT_GRAY)
+done2Text1 = font.render("(click anywhere to skip)", 1, LIGHT_GRAY)
+done2Text2 = font.render("Once again you have defeated your enemy!", 1, LIGHT_GRAY)
+done2Text3 = font.render("You are now the hero of the land!", 1, LIGHT_GRAY)
+loading = font.render("Loading...", 1, LIGHT_GRAY)
 font2 = pygame.font.Font(None, 24)
-creditsText1 = font2.render("Game by: Logan Ralston", 1, lightGrey)
-screen.fill(black)
+creditsText1 = font2.render("Game by: Logan Ralston", 1, LIGHT_GRAY)
+screen.fill(BLACK)
 screen.blit(loading, [10, 10])
 screen.blit(creditsText1, [10, 58])
 pygame.display.flip()
@@ -300,7 +303,6 @@ sidebar = Sidebar()
 #monsters
 gems = pygame.sprite.Group()
 gemTemplate = Gem(screen)
-gemTemplate.load()
 monsters = pygame.sprite.Group()
 monsters1 = pygame.sprite.Group()
 finalWave = pygame.sprite.Group()
@@ -309,8 +311,7 @@ time = 1
 #Level 1
 for i in range(random.randint(10, 20)):
     type = random.choice(["bat", "bat", "bat", "bat", "plant", "plant", "plant", "orc", "orc", "orc2", "slime"])
-    m = Monster(screen)
-    m.load(stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
+    m = Monster(screen, stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
     m.update(1, False)
     m.set_rect(random.randint( - 500, -1), random.randint(25, WINDOW_HEIGHT - 70 - SIDEBAR_HEIGHT))
     m.set_speed(stats[type]["speed"])
@@ -329,8 +330,7 @@ for i in range(10):
         min = -30
         max = -60
         type = "golem"
-    m = Monster(screen)
-    m.load(stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
+    m = Monster(screen, stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
     m.update(1, False)
     m.set_rect(random.randint(max, min), random.randint(25, WINDOW_HEIGHT - 85 - SIDEBAR_HEIGHT))
     m.set_speed(stats[type]["speed"])
@@ -341,8 +341,7 @@ monsters2 = pygame.sprite.Group()
 finalWave2 = pygame.sprite.Group()
 for i in range(random.randint(35, 40)):
     type = random.choice(["bat", "bat", "tree", "plant", "plant", "plant", "plant", "orc2", "orc2", "slime", "slime"])
-    m = Monster(screen)
-    m.load(stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
+    m = Monster(screen, stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
     m.update(1, False)
     m.set_rect(random.randint( - 550, -1), random.randint(25, WINDOW_HEIGHT - 70 - SIDEBAR_HEIGHT))
     m.set_speed(stats[type]["speed"])
@@ -365,8 +364,7 @@ for i in range(21):
         type = "genie"
         min = -30
         max = -60
-    m = Monster(screen)
-    m.load(stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
+    m = Monster(screen, stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
     m.update(1, False)
     m.set_rect(random.randint(max, min), random.randint(25, WINDOW_HEIGHT - 85 - SIDEBAR_HEIGHT))
     m.set_speed(stats[type]["speed"])
@@ -377,8 +375,7 @@ monsters3 = pygame.sprite.Group()
 finalWave3 = pygame.sprite.Group()
 for i in range(random.randint(25, 30)):
     type = random.choice(["dino", "dino", "dino", "plant", "orc2", "orc2", "orc", "dino", "ogre", "ogre", "slime"])
-    m = Monster(screen)
-    m.load(stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
+    m = Monster(screen, stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
     m.update(1, False)
     m.set_rect(random.randint( - 650, -1), random.randint(25, WINDOW_HEIGHT - 70 - SIDEBAR_HEIGHT))
     m.set_speed(stats[type]["speed"])
@@ -397,8 +394,7 @@ for i in range(21):
         type = "tablet"
         min = -30
         max = -60
-    m = Monster(screen)
-    m.load(stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
+    m = Monster(screen, stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
     m.update(1, False)
     m.set_rect(random.randint(max, min), random.randint(25, WINDOW_HEIGHT - 85 - SIDEBAR_HEIGHT))
     m.set_speed(stats[type]["speed"])
@@ -409,8 +405,7 @@ monsters4 = pygame.sprite.Group()
 finalWave4 = pygame.sprite.Group()
 for i in range(random.randint(45, 65)):
     type = random.choice(["bat", "bat", "ogre", "ogre", "skeleton", "skeleton", "skeleton", "skeleton", "tree", "orc", "orc2", "orc", "slime", "slime"])
-    m = Monster(screen)
-    m.load(stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
+    m = Monster(screen, stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
     m.update(1, False)
     m.set_rect(random.randint( - 1000, -1), random.randint(25, WINDOW_HEIGHT - 70 - SIDEBAR_HEIGHT))
     m.set_speed(stats[type]["speed"])
@@ -441,8 +436,7 @@ for i in range(21):
         type = "golem"
         min = -200
         max = -200
-    m = Monster(screen)
-    m.load(stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
+    m = Monster(screen, stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
     m.update(1, False)
     m.set_rect(random.randint(max, min), random.randint(25, WINDOW_HEIGHT - 85 - SIDEBAR_HEIGHT))
     m.set_speed(stats[type]["speed"])
@@ -453,8 +447,7 @@ monsters5 = pygame.sprite.Group()
 finalWave5 = pygame.sprite.Group()
 for i in range(random.randint(12, 16)):
     type = random.choice(["golem", "genie", "genie", "plant", "orc", "orc", "skeleton", "skeleton"])
-    m = Monster(screen)
-    m.load(stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
+    m = Monster(screen, stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
     m.update(1, False)
     m.set_rect(random.randint( - 550, -1), random.randint(25, WINDOW_HEIGHT - 70 - SIDEBAR_HEIGHT))
     m.set_speed(stats[type]["speed"])
@@ -473,8 +466,7 @@ for i in range(12):
         type = "soul tree"
         min = -30
         max = -60
-    m = Monster(screen)
-    m.load(stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
+    m = Monster(screen, stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
     m.update(1, False)
     m.set_rect(random.randint(max, min), random.randint(25, WINDOW_HEIGHT - 85 - SIDEBAR_HEIGHT))
     m.set_speed(stats[type]["speed"])
@@ -485,8 +477,7 @@ monsters6 = pygame.sprite.Group()
 finalWave6 = pygame.sprite.Group()
 for i in range(random.randint(38, 43)):
     type = random.choice(["bat", "bat", "orc2", "orc2", "slime", "slime", "slime", "skeleton", "skeleton", "ogre", "ogre", "ogre", "dino", "bat", "bat", "orc2", "orc2", "slime", "slime", "slime", "skeleton", "skeleton", "ogre", "ogre", "ogre", "dino", "demon", "tablet"])
-    m = Monster(screen)
-    m.load(stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
+    m = Monster(screen, stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
     m.update(1, False)
     m.set_rect(random.randint( - 2000, -1), random.randint(25, WINDOW_HEIGHT - 70 - SIDEBAR_HEIGHT))
     m.set_speed(stats[type]["speed"])
@@ -513,8 +504,7 @@ for i in range(15):
         type = "demon lord"
         min = -30
         max = -60
-    m = Monster(screen)
-    m.load(stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
+    m = Monster(screen, stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
     m.update(1, False)
     m.set_rect(random.randint(max, min), random.randint(25, WINDOW_HEIGHT - 85 - SIDEBAR_HEIGHT))
     m.set_speed(stats[type]["speed"])
@@ -525,16 +515,14 @@ for i in range(15):
 fireballs = pygame.sprite.Group()
 fireballsOff = pygame.sprite.Group()
 for i in range(4):
-    effect = spellEffect(screen)
-    effect.load("fireballSpell.bmp", 16, 48, 6)
+    effect = SpellEffect(screen, "fireballSpell.bmp", 16, 48, 6)
     effect.update(1, False)
     effect.set_rect(0, 0)
     effect.set_speed([0, 5])
     fireballsOff.add(effect)
 whirlwinds = pygame.sprite.Group()
 whirlwindsOff = pygame.sprite.Group()
-effect = spellEffect(screen)
-effect.load("whirlwindSpell.bmp", 29, 32, 2)
+effect = SpellEffect(screen, "whirlwindSpell.bmp", 29, 32, 2)
 effect.update(1, False)
 effect.set_rect(0, 0)
 effect.set_speed([ - 10, 0])
@@ -543,15 +531,14 @@ whirlwindsOff.add(effect)
 ghosts = pygame.sprite.Group()
 ghostsOff = pygame.sprite.Group()
 for i in range(6):
-    effect = spellEffect(screen)
-    effect.load("ghostSpell.bmp", 32, 32, 2)
+    effect = SpellEffect(screen, "ghostSpell.bmp", 32, 32, 2)
     effect.update(1, False)
     effect.set_rect(0, 0)
     effect.set_speed([12, 0])
     ghostsOff.add(effect)
 
 def draw():
-    screen.fill(white)
+    screen.fill(WHITE)
     background.draw()
     sidebar.draw()
     for monster in monsters:
@@ -601,7 +588,7 @@ while introdone == False:
             sys.exit()
         elif event.type == pygame.MOUSEBUTTONDOWN:
             introdone = True
-    screen.fill(black)
+    screen.fill(BLACK)
     screen.blit(introText1, [10, y - 26 * 3 - 5])
     screen.blit(introText2, [10, y - 26 * 2])
     screen.blit(introText3, [10, y - 26])
@@ -619,7 +606,7 @@ while instructionsdone == False:
             sys.exit()
         elif event.type == pygame.MOUSEBUTTONDOWN:
             instructionsdone = True
-    screen.fill(black)
+    screen.fill(BLACK)
     screen.blit(helpText1, [10, y - 26 * 7 - 5])
     screen.blit(helpText2, [10, y - 26 * 6])
     screen.blit(helpText3, [10, y - 26 * 5])
@@ -754,7 +741,7 @@ while done==False and gameover==False:
                             sys.exit()
                         elif event.type == pygame.MOUSEBUTTONDOWN:
                             viewDone = True
-                    screen.fill(black)
+                    screen.fill(BLACK)
                     screen.blit(doneText1, [10, y - 26 * 7 - 5])
                     screen.blit(doneText2, [10, y - 26 * 6])
                     screen.blit(doneText3, [10, y - 26 * 5])
@@ -812,7 +799,7 @@ while done==False and gameover==False:
                             sys.exit()
                         elif event.type == pygame.MOUSEBUTTONDOWN:
                             viewDone = True
-                    screen.fill(black)
+                    screen.fill(BLACK)
                     screen.blit(done2Text1, [10, y - 26 * 2 - 5])
                     screen.blit(done2Text2, [10, y - 26])
                     screen.blit(done2Text3, [10, y])
@@ -836,10 +823,10 @@ while done==False and gameover==False:
 
 if done==False:
     if youwin:
-        gameOverText = font.render("You Win!", 1, black)
+        gameOverText = font.render("You Win!", 1, BLACK)
     else:
-        gameOverText = font.render("You Lose!", 1, black)
-    screen.fill(white)
+        gameOverText = font.render("You Lose!", 1, BLACK)
+    screen.fill(WHITE)
     background.draw()
     sidebar.draw()
     screen.blit(gameOverText, [10, 10])
