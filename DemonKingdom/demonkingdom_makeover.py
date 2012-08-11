@@ -9,6 +9,14 @@ import random
 import copy
 import sys
 
+MAP_WIDTH = 600
+MAP_HEIGHT = 360
+
+SIDEBAR_HEIGHT = 120
+
+WINDOW_WIDTH = MAP_WIDTH
+WINDOW_HEIGHT = MAP_HEIGHT + SIDEBAR_HEIGHT
+
 class Background(pygame.sprite.Sprite):
     def __init__(self, imageList):
         self.imageList = []
@@ -29,25 +37,34 @@ class Background(pygame.sprite.Sprite):
 class Sidebar():
     def __init__(self):
         self.font = pygame.font.Font(None, 22)
-        self.gems = 0
-        self.gemsText = self.font.render(str(self.gems) + " gems", 1, lightGrey)
+        self.numGemsCache = numGems
+        self.gemsText = self.font.render(str(numGems) + " gems", 1, lightGrey)
         self.spells = pygame.sprite.Group()
-        spell = SpellIcon(pygame.image.load("images/fireballIcon.bmp"), 100, 360 + 30, 5, castFireBall, 1)
-        self.spells.add(spell)
-        spell = SpellIcon(pygame.image.load("images/whirlwindIcon.bmp"), 170, 360 + 31, 8, castWhirlWind, 2)
-        self.spells.add(spell)
-        spell = SpellIcon(pygame.image.load("images/ghostIcon.bmp"), 240, 360 + 30, 10, castGhost, 3)
-        self.spells.add(spell)
-        self.logo = logo(pygame.image.load("images/logo.bmp"), 360, 360 + 10)
+
+        #          image filename,      x,   y,               cost, function,    hotkey
+        spells = (('fireballIcon.bmp',  100, MAP_HEIGHT + 30, 5,  castFireBall,  1),
+                  ('whirlwindIcon.bmp', 170, MAP_HEIGHT + 30, 8,  castWhirlWind, 2),
+                  ('ghostIcon.bmp',     240, MAP_HEIGHT + 30, 10, castGhost,     3))
+
+        for spell in spells:
+            spell = SpellIcon(pygame.image.load('images/' + spell[0]), spell[1], spell[2], spell[3], spell[4], spell[5])
+            self.spells.add(spell)
+
+        self.logo = Logo(pygame.image.load("images/logo.bmp"), 360, 370)
+
     def draw(self):
-        pygame.draw.rect(screen, black, [0, 360, size[0], size[1] - 360])
+        if self.numGemsCache != numGems:
+            # update the "X gems" text Surface object
+            self.gemsText = self.font.render(str(numGems) + " gems", 1, lightGrey)
+
+        pygame.draw.rect(screen, black, [0, 360, WINDOW_WIDTH, WINDOW_HEIGHT - 360])
         screen.blit(self.gemsText, [10, 360 + 20])
+
         for spell in self.spells:
             spell.draw()
+
         self.logo.draw()
-    def addGems(self, amount):
-        self.gems += amount
-        self.gemsText = self.font.render(str(self.gems) + " gems", 1, lightGrey)
+
 
 class MySprite(pygame.sprite.Sprite):
     def __init__(self, target):
@@ -112,7 +129,7 @@ class Monster(MySprite):
             screen.blit(self.image, self.rect)
             pygame.draw.rect(screen, black, [self.rect.left, self.rect.top - 20, self.whole_life * 10, 14])
             pygame.draw.rect(screen, red, [self.rect.left, self.rect.top - 20, self.life * 10, 14])
-            if self.rect.left >= size[0]:
+            if self.rect.left >= WINDOW_WIDTH:
                 gameover = True
     def kill(self):
         if self.life == 1 and self in monsters:
@@ -154,7 +171,7 @@ class SpellIcon(pygame.sprite.Sprite):
         screen.blit(self.costText, [self.rect.left, self.rect.bottom + 10])
         screen.blit(self.hotKeyText, [self.rect.left, self.rect.bottom + 25])
 
-class logo(pygame.sprite.Sprite):
+class Logo(pygame.sprite.Sprite):
     def __init__(self, image, x, y):
         self.image = image
         self.image.set_colorkey(white, pygame.RLEACCEL)
@@ -178,21 +195,21 @@ def castFireBall():
     fireballSound.play()
     for fireball in fireballsOff:
         fireballsOff.remove(fireball)
-        fireball.set_rect(random.randint(30, size[0] - 30), -10)
+        fireball.set_rect(random.randint(30, WINDOW_WIDTH - 30), -10)
         fireballs.add(fireball)
 
 def castWhirlWind():
     whirlwindSound.play()
     for whirlwind in whirlwindsOff:
         whirlwindsOff.remove(whirlwind)
-        whirlwind.set_rect(size[0] + 20, random.randint(30, size[1] - 30 - sidebarLength))
+        whirlwind.set_rect(WINDOW_WIDTH + 20, random.randint(30, WINDOW_HEIGHT - 30 - SIDEBAR_HEIGHT))
         whirlwinds.add(whirlwind)
 
 def castGhost():
     ghostSound.play()
     for ghost in ghostsOff:
         ghostsOff.remove(ghost)
-        ghost.set_rect( - 10, random.randint(30, size[1] - 30 - sidebarLength))
+        ghost.set_rect( - 10, random.randint(30, WINDOW_HEIGHT - 30 - SIDEBAR_HEIGHT))
         ghosts.add(ghost)
 
 # Define some colors
@@ -206,9 +223,7 @@ lightGrey = ( 200, 200, 200)
 pygame.init()
 
 # Set the height and width of the screen
-sidebarLength = 120
-size=[600, 360 + sidebarLength]
-screen=pygame.display.set_mode(size)
+screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame.display.set_caption("Demon Kingdom")
 
 #Loop until the user clicks the close button.
@@ -270,6 +285,8 @@ whirlwindSound = pygame.mixer.Sound("sounds/whirlwind.wav")
 ghostSound = pygame.mixer.Sound("sounds/ghost.wav")
 getGem = pygame.mixer.Sound("sounds/pickupGem.wav")
 
+numGems = 0
+
 #background
 background = Background(('background1.png',
                          'background2.png',
@@ -278,6 +295,7 @@ background = Background(('background1.png',
                          'background5.png',
                          'background6.png'))
 sidebar = Sidebar()
+
 
 #monsters
 gems = pygame.sprite.Group()
@@ -294,7 +312,7 @@ for i in range(random.randint(10, 20)):
     m = Monster(screen)
     m.load(stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
     m.update(1, False)
-    m.set_rect(random.randint( - 500, -1), random.randint(25, size[1] - 70 - sidebarLength))
+    m.set_rect(random.randint( - 500, -1), random.randint(25, WINDOW_HEIGHT - 70 - SIDEBAR_HEIGHT))
     m.set_speed(stats[type]["speed"])
     m.set_life(stats[type]["life"])
     monsters1.add(m)
@@ -314,7 +332,7 @@ for i in range(10):
     m = Monster(screen)
     m.load(stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
     m.update(1, False)
-    m.set_rect(random.randint(max, min), random.randint(25, size[1] - 85 - sidebarLength))
+    m.set_rect(random.randint(max, min), random.randint(25, WINDOW_HEIGHT - 85 - SIDEBAR_HEIGHT))
     m.set_speed(stats[type]["speed"])
     m.set_life(stats[type]["life"])
     finalWave.add(m)
@@ -326,7 +344,7 @@ for i in range(random.randint(35, 40)):
     m = Monster(screen)
     m.load(stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
     m.update(1, False)
-    m.set_rect(random.randint( - 550, -1), random.randint(25, size[1] - 70 - sidebarLength))
+    m.set_rect(random.randint( - 550, -1), random.randint(25, WINDOW_HEIGHT - 70 - SIDEBAR_HEIGHT))
     m.set_speed(stats[type]["speed"])
     m.set_life(stats[type]["life"])
     monsters2.add(m)
@@ -350,7 +368,7 @@ for i in range(21):
     m = Monster(screen)
     m.load(stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
     m.update(1, False)
-    m.set_rect(random.randint(max, min), random.randint(25, size[1] - 85 - sidebarLength))
+    m.set_rect(random.randint(max, min), random.randint(25, WINDOW_HEIGHT - 85 - SIDEBAR_HEIGHT))
     m.set_speed(stats[type]["speed"])
     m.set_life(stats[type]["life"])
     finalWave2.add(m)
@@ -362,7 +380,7 @@ for i in range(random.randint(25, 30)):
     m = Monster(screen)
     m.load(stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
     m.update(1, False)
-    m.set_rect(random.randint( - 650, -1), random.randint(25, size[1] - 70 - sidebarLength))
+    m.set_rect(random.randint( - 650, -1), random.randint(25, WINDOW_HEIGHT - 70 - SIDEBAR_HEIGHT))
     m.set_speed(stats[type]["speed"])
     m.set_life(stats[type]["life"])
     monsters3.add(m)
@@ -382,7 +400,7 @@ for i in range(21):
     m = Monster(screen)
     m.load(stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
     m.update(1, False)
-    m.set_rect(random.randint(max, min), random.randint(25, size[1] - 85 - sidebarLength))
+    m.set_rect(random.randint(max, min), random.randint(25, WINDOW_HEIGHT - 85 - SIDEBAR_HEIGHT))
     m.set_speed(stats[type]["speed"])
     m.set_life(stats[type]["life"])
     finalWave3.add(m)
@@ -394,7 +412,7 @@ for i in range(random.randint(45, 65)):
     m = Monster(screen)
     m.load(stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
     m.update(1, False)
-    m.set_rect(random.randint( - 1000, -1), random.randint(25, size[1] - 70 - sidebarLength))
+    m.set_rect(random.randint( - 1000, -1), random.randint(25, WINDOW_HEIGHT - 70 - SIDEBAR_HEIGHT))
     m.set_speed(stats[type]["speed"])
     m.set_life(stats[type]["life"])
     monsters4.add(m)
@@ -426,7 +444,7 @@ for i in range(21):
     m = Monster(screen)
     m.load(stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
     m.update(1, False)
-    m.set_rect(random.randint(max, min), random.randint(25, size[1] - 85 - sidebarLength))
+    m.set_rect(random.randint(max, min), random.randint(25, WINDOW_HEIGHT - 85 - SIDEBAR_HEIGHT))
     m.set_speed(stats[type]["speed"])
     m.set_life(stats[type]["life"])
     finalWave4.add(m)
@@ -438,7 +456,7 @@ for i in range(random.randint(12, 16)):
     m = Monster(screen)
     m.load(stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
     m.update(1, False)
-    m.set_rect(random.randint( - 550, -1), random.randint(25, size[1] - 70 - sidebarLength))
+    m.set_rect(random.randint( - 550, -1), random.randint(25, WINDOW_HEIGHT - 70 - SIDEBAR_HEIGHT))
     m.set_speed(stats[type]["speed"])
     m.set_life(stats[type]["life"])
     monsters5.add(m)
@@ -458,7 +476,7 @@ for i in range(12):
     m = Monster(screen)
     m.load(stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
     m.update(1, False)
-    m.set_rect(random.randint(max, min), random.randint(25, size[1] - 85 - sidebarLength))
+    m.set_rect(random.randint(max, min), random.randint(25, WINDOW_HEIGHT - 85 - SIDEBAR_HEIGHT))
     m.set_speed(stats[type]["speed"])
     m.set_life(stats[type]["life"])
     finalWave5.add(m)
@@ -470,7 +488,7 @@ for i in range(random.randint(38, 43)):
     m = Monster(screen)
     m.load(stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
     m.update(1, False)
-    m.set_rect(random.randint( - 2000, -1), random.randint(25, size[1] - 70 - sidebarLength))
+    m.set_rect(random.randint( - 2000, -1), random.randint(25, WINDOW_HEIGHT - 70 - SIDEBAR_HEIGHT))
     m.set_speed(stats[type]["speed"])
     m.set_life(stats[type]["life"])
     monsters6.add(m)
@@ -498,7 +516,7 @@ for i in range(15):
     m = Monster(screen)
     m.load(stats[type]["image"][0], stats[type]["image"][1], stats[type]["image"][2], stats[type]["image"][3])
     m.update(1, False)
-    m.set_rect(random.randint(max, min), random.randint(25, size[1] - 85 - sidebarLength))
+    m.set_rect(random.randint(max, min), random.randint(25, WINDOW_HEIGHT - 85 - SIDEBAR_HEIGHT))
     m.set_speed(stats[type]["speed"])
     m.set_life(stats[type]["life"])
     finalWave6.add(m)
@@ -542,7 +560,7 @@ def draw():
         gem.update(time)
     for fireball in fireballs:
         fireball.update(time)
-        if fireball.rect.bottom >= size[1] - sidebarLength - 5:
+        if fireball.rect.bottom >= WINDOW_HEIGHT - SIDEBAR_HEIGHT - 5:
             fireballs.remove(fireball)
             fireballsOff.add(fireball)
         hits = pygame.sprite.spritecollide(fireball, monsters, False)
@@ -566,7 +584,7 @@ def draw():
                         hit.kill()
     for ghost in ghosts:
         ghost.update(time)
-        if ghost.rect.left >= size[0] - 5:
+        if ghost.rect.left >= WINDOW_WIDTH - 5:
             ghosts.remove(ghost)
             ghostsOff.add(ghost)
         hits = pygame.sprite.spritecollide(ghost, monsters, False)
@@ -576,7 +594,7 @@ def draw():
     pygame.display.flip()
 
 introdone = False
-y = size[1] + 26 * 3 + 5
+y = WINDOW_HEIGHT + 26 * 3 + 5
 while introdone == False:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -594,7 +612,7 @@ while introdone == False:
     y -= 1
     clock.tick(20)
 instructionsdone = False
-y = size[1] + 26 * 7 + 5
+y = WINDOW_HEIGHT + 26 * 7 + 5
 while instructionsdone == False:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -629,16 +647,16 @@ while done==False and gameover==False:
             done=True
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_1:
-                if sidebar.gems >= 5:
-                    sidebar.addGems( - 5)
+                if numGems >= 5:
+                    numGems -= 5
                     castFireBall()
             elif event.key == pygame.K_2:
-                if sidebar.gems >= 8:
-                    sidebar.addGems( - 8)
+                if numGems >= 8:
+                    numGems -= 8
                     castWhirlWind()
             elif event.key == pygame.K_3:
-                if sidebar.gems >= 10:
-                    sidebar.addGems( - 10)
+                if numGems >= 10:
+                    numGems -= 10
                     castGhost()
     if pygame.mouse.get_pressed()[0] == 1:
         if mouseLastDown == False:
@@ -649,12 +667,12 @@ while done==False and gameover==False:
             for gem in gems:
                 if gem.rect.collidepoint(pygame.mouse.get_pos()):
                     gem.remove()
-                    sidebar.addGems(1)
+                    numGems += 1
                     getGem.play()
             for spell in sidebar.spells:
                 if spell.rect.collidepoint(pygame.mouse.get_pos()):
-                    if sidebar.gems >= spell.cost:
-                        sidebar.addGems( - 1 * spell.cost)
+                    if numGems >= spell.cost:
+                        numGems -= spell.cost
                         spell.action()
         mouseLastDown = True
     else:
@@ -729,7 +747,7 @@ while done==False and gameover==False:
                 monsters = finalWave4
             else:
                 viewDone = False
-                y = size[1] + 27 * 6 + 5
+                y = WINDOW_HEIGHT + 27 * 6 + 5
                 while viewDone == False:
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
@@ -787,7 +805,7 @@ while done==False and gameover==False:
                 monsters = finalWave6
             else:
                 viewDone = False
-                y = size[1] + 27 * 2 + 5
+                y = WINDOW_HEIGHT + 27 * 2 + 5
                 while viewDone == False:
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
@@ -809,7 +827,7 @@ while done==False and gameover==False:
     if random.randint(0, 150) == 150:
         gem = copy.copy(gemTemplate)
         gem.update(1, False)
-        gem.set_rect(random.randint(20, size[1] - 20), random.randint(36, size[1] - 36 - sidebarLength))
+        gem.set_rect(random.randint(20, WINDOW_HEIGHT - 20), random.randint(36, WINDOW_HEIGHT - 36 - SIDEBAR_HEIGHT))
         gems.add(copy.copy(gem))
 
     draw()
