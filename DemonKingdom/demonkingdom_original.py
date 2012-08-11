@@ -170,21 +170,21 @@ class spellEffect(MySprite):
             screen.blit(self.image,self.rect)
 
 def castFireBall():
-    #fireballSound.play()
+    fireballSound.play()
     for fireball in fireballsOff:
         fireballsOff.remove(fireball)
         fireball.set_rect(random.randint(30,size[0]-30),-10)
         fireballs.add(fireball)
 
 def castWhirlWind():
-    #whirlwindSound.play()
+    whirlwindSound.play()
     for whirlwind in whirlwindsOff:
         whirlwindsOff.remove(whirlwind)
         whirlwind.set_rect(size[0]+20,random.randint(30,size[1]-30-sidebarLength))
         whirlwinds.add(whirlwind)
 
 def castGhost():
-    #ghostSound.play()
+    ghostSound.play()
     for ghost in ghostsOff:
         ghostsOff.remove(ghost)
         ghost.set_rect(-10,random.randint(30,size[1]-30-sidebarLength))
@@ -258,12 +258,12 @@ screen.blit(creditsText1,[10,58])
 pygame.display.flip()
 
 #sound
-#pygame.mixer.init()
-#sword = pygame.mixer.Sound("sword.wav")
-#fireballSound = pygame.mixer.Sound("fireball.wav")
-#whirlwindSound = pygame.mixer.Sound("whirlwind.wav")
-#ghostSound = pygame.mixer.Sound("ghost.wav")
-#getGem = pygame.mixer.Sound("pickupGem.wav")
+pygame.mixer.init()
+sword = pygame.mixer.Sound("sword.wav")
+fireballSound = pygame.mixer.Sound("fireball.wav")
+whirlwindSound = pygame.mixer.Sound("whirlwind.wav")
+ghostSound = pygame.mixer.Sound("ghost.wav")
+getGem = pygame.mixer.Sound("pickupGem.wav")
 
 #background
 background = Background(pygame.image.load("background.png").convert())
@@ -639,13 +639,13 @@ while done==False and gameover==False:
         if mouseLastDown == False:
             for monster in monsters:
                 if monster.rect.collidepoint(pygame.mouse.get_pos()):
-                    #sword.play()
+                    sword.play()
                     monster.kill()
             for gem in gems:
                 if gem.rect.collidepoint(pygame.mouse.get_pos()):
                     gem.remove()
                     sidebar.addGems(1)
-                    #getGem.play()
+                    getGem.play()
             for spell in sidebar.spells:
                 if spell.rect.collidepoint(pygame.mouse.get_pos()):
                     if sidebar.gems >= spell.cost:
