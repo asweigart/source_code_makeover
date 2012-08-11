@@ -10,13 +10,19 @@ import copy
 import sys
 
 class Background(pygame.sprite.Sprite):
-    def __init__(self, image):
-        self.image = image
-        self.rect = image.get_rect()
+    def __init__(self, imageList):
+        self.imageList = []
+        for image in imageList:
+            self.imageList.append(pygame.image.load("images/" + image).convert())
+        self.image = self.imageList[0]
+        self.rect = self.image.get_rect()
         self.rect.top = 0
         self.rect.left = 0
-    def changeBackground(self, image):
-        self.image = image
+
+    def changeBackground(self, imageNum):
+        self.image = self.imageList[imageNum]
+        self.rect = self.image.get_rect()
+
     def draw(self):
         screen.blit(self.image, self.rect)
 
@@ -265,13 +271,13 @@ ghostSound = pygame.mixer.Sound("sounds/ghost.wav")
 getGem = pygame.mixer.Sound("sounds/pickupGem.wav")
 
 #background
-background = Background(pygame.image.load("images/background.png").convert())
+background = Background(('background1.png',
+                         'background2.png',
+                         'background3.png',
+                         'background4.png',
+                         'background5.png',
+                         'background6.png'))
 sidebar = Sidebar()
-back2 = pygame.image.load("images/background2.png").convert()
-back3 = pygame.image.load("images/background3.png").convert()
-back4 = pygame.image.load("images/background4.png").convert()
-back5 = pygame.image.load("images/background5.png").convert()
-back6 = pygame.image.load("images/background6.png").convert()
 
 #monsters
 gems = pygame.sprite.Group()
@@ -671,7 +677,7 @@ while done==False and gameover==False:
                 finalWaveDone = False
                 level += 1
                 gems = pygame.sprite.Group()
-                background.changeBackground(back2)
+                background.changeBackground(1)
                 draw()
                 screen.blit(level2Text, [10, 10])
                 pygame.display.flip()
@@ -689,7 +695,7 @@ while done==False and gameover==False:
                 finalWaveDone = False
                 level += 1
                 gems = pygame.sprite.Group()
-                background.changeBackground(back3)
+                background.changeBackground(2)
                 draw()
                 screen.blit(level3Text, [10, 10])
                 pygame.display.flip()
@@ -707,7 +713,7 @@ while done==False and gameover==False:
                 finalWaveDone = False
                 level += 1
                 gems = pygame.sprite.Group()
-                background.changeBackground(back4)
+                background.changeBackground(3)
                 draw()
                 screen.blit(level4Text, [10, 10])
                 pygame.display.flip()
@@ -747,7 +753,7 @@ while done==False and gameover==False:
                 finalWaveDone = False
                 level += 1
                 gems = pygame.sprite.Group()
-                background.changeBackground(back5)
+                background.changeBackground(4)
                 draw()
                 screen.blit(level5Text, [10, 10])
                 pygame.display.flip()
@@ -765,7 +771,7 @@ while done==False and gameover==False:
                 finalWaveDone = False
                 level += 1
                 gems = pygame.sprite.Group()
-                background.changeBackground(back6)
+                background.changeBackground(5)
                 draw()
                 screen.blit(level6Text, [10, 10])
                 pygame.display.flip()
