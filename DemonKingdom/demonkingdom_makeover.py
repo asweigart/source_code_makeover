@@ -243,40 +243,49 @@ level = 1
 clock=pygame.time.Clock()
 
 #font
-font = pygame.font.Font(None, 38)
-finalWaveText = font.render("Now for the final wave...", 1, BLACK)
-level1Text = font.render("Level I - The Dungeon of Stone", 1, BLACK)
-level2Text = font.render("Level II - The Field of the Flowers", 1, BLACK)
-level3Text = font.render("Level III - The Ice Lands", 1, BLACK)
-level4Text = font.render("Level IV - The Demon's Home", 1, BLACK)
-level5Text = font.render("Level V - The Desert", 1, BLACK)
-level6Text = font.render("Level VI - The Caves of the Demon Lord", 1, BLACK)
-introText1 = font.render("(click anywhere to skip)", 1, LIGHT_GRAY)
-introText2 = font.render("The Demon of Gar - noth has risen.", 1, LIGHT_GRAY)
-introText3 = font.render("The whole land is in danger!", 1, LIGHT_GRAY)
-introText4 = font.render("You must defeat the demon and his forces.", 1, LIGHT_GRAY)
-helpText1  = font.render("(click anywhere to skip)", 1, LIGHT_GRAY)
-helpText2  = font.render("Click on creature to attack them.", 1, LIGHT_GRAY)
-helpText3  = font.render("Collect gems to cast spells.", 1, LIGHT_GRAY)
-helpText4  = font.render("To cast a spell either click the icon", 1, LIGHT_GRAY)
-helpText5  = font.render("or use their hot keys:", 1, LIGHT_GRAY)
-helpText6  = font.render("1 - Fireball, 2 - Whirlwind, 3 - Summon Ghost.", 1, LIGHT_GRAY)
-helpText7  = font.render("Don't let any of the monsters get off", 1, LIGHT_GRAY)
-helpText8  = font.render("the egde of the screen.", 1, LIGHT_GRAY)
-doneText1 = font.render("(click anywhere to skip)", 1, LIGHT_GRAY)
-doneText2 = font.render("You have defeated The Demon of Gar - noth!", 1, LIGHT_GRAY)
-doneText3 = font.render("His forces are destored.", 1, LIGHT_GRAY)
-doneText4 = font.render("But you know the land is still in danger...", 1, LIGHT_GRAY)
-doneText5 = font.render("The Demon Lord has heard about the defeat", 1, LIGHT_GRAY)
-doneText6 = font.render("of The Demon of Gar - noth.", 1, LIGHT_GRAY)
-doneText7 = font.render("Knowing this you set out to the land of demons.", 1, LIGHT_GRAY)
-doneText8 = font.render("To once and for all destory the demons.", 1, LIGHT_GRAY)
-done2Text1 = font.render("(click anywhere to skip)", 1, LIGHT_GRAY)
-done2Text2 = font.render("Once again you have defeated your enemy!", 1, LIGHT_GRAY)
-done2Text3 = font.render("You are now the hero of the land!", 1, LIGHT_GRAY)
-loading = font.render("Loading...", 1, LIGHT_GRAY)
-font2 = pygame.font.Font(None, 24)
-creditsText1 = font2.render("Game by: Logan Ralston", 1, LIGHT_GRAY)
+mainFont = pygame.font.Font(None, 38)
+finalWaveText = mainFont.render("Now for the final wave...", 1, BLACK)
+levelText = [mainFont.render(text, 1, BLACK) for text in
+"""Level I - The Dungeon of Stone
+Level II - The Field of the Flowers
+Level III - The Ice Lands
+Level IV - The Demon's Home
+Level V - The Desert
+Level VI - The Caves of the Demon Lord""".split('\n')]
+
+introText = ['(click anywhere to skip)',
+             'The Demon of Gar - noth has risen.',
+             'The whole land is in danger!',
+             'You must defeat the demon and his forces.']
+introText = [mainFont.render(text, 1, LIGHT_GRAY) for text in introText]
+helpText = ['(click anywhere to skip)',
+            'Click on creature to attack them.',
+            'Collect gems to cast spells.',
+            'To cast a spell either click the icon',
+            'or use their hot keys:',
+            '1 - Fireball, 2 - Whirlwind, 3 - Summon Ghost.',
+            'Don\'t let any of the monsters get off',
+            'the egde of the screen.']
+helpText = [mainFont.render(text, 1, LIGHT_GRAY) for text in helpText]
+doneText = ['(click anywhere to skip)',
+            'You have defeated The Demon of Gar - noth!',
+            'His forces are destored.',
+            'But you know the land is still in danger...',
+            'The Demon Lord has heard about the defeat',
+            'of The Demon of Gar - noth.',
+            'Knowing this you set out to the land of demons.',
+            'To once and for all destory the demons.']
+doneText = [mainFont.render(text, 1, LIGHT_GRAY) for text in doneText]
+done2Text = ['(click anywhere to skip)',
+            'Once again you have defeated your enemy!',
+            'You are now the hero of the land!']
+done2Text = [mainFont.render(text, 1, LIGHT_GRAY) for text in done2Text]
+
+loading = mainFont.render("Loading...", 1, LIGHT_GRAY)
+
+subFont = pygame.font.Font(None, 24)
+creditsText1 = subFont.render("Game by: Logan Ralston", 1, LIGHT_GRAY)
+
 screen.fill(BLACK)
 screen.blit(loading, [10, 10])
 screen.blit(creditsText1, [10, 58])
@@ -284,11 +293,11 @@ pygame.display.flip()
 
 #sound
 pygame.mixer.init()
-sword = pygame.mixer.Sound("sounds/sword.wav")
-fireballSound = pygame.mixer.Sound("sounds/fireball.wav")
+swordSound     = pygame.mixer.Sound("sounds/sword.wav")
+fireballSound  = pygame.mixer.Sound("sounds/fireball.wav")
 whirlwindSound = pygame.mixer.Sound("sounds/whirlwind.wav")
-ghostSound = pygame.mixer.Sound("sounds/ghost.wav")
-getGem = pygame.mixer.Sound("sounds/pickupGem.wav")
+ghostSound     = pygame.mixer.Sound("sounds/ghost.wav")
+getGemSound    = pygame.mixer.Sound("sounds/pickupGem.wav")
 
 numGems = 0
 
@@ -605,10 +614,8 @@ while introdone == False:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             introdone = True
     screen.fill(BLACK)
-    screen.blit(introText1, [10, y - 26 * 3 - 5])
-    screen.blit(introText2, [10, y - 26 * 2])
-    screen.blit(introText3, [10, y - 26])
-    screen.blit(introText4, [10, y])
+    for i in range(len(introText)):
+        screen.blit(introText[i], (10, y - (26 * (len(introText) - 1 - i))))
     if y <= 0:
         introdone = True
     pygame.display.flip()
@@ -623,14 +630,8 @@ while instructionsdone == False:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             instructionsdone = True
     screen.fill(BLACK)
-    screen.blit(helpText1, [10, y - 26 * 7 - 5])
-    screen.blit(helpText2, [10, y - 26 * 6])
-    screen.blit(helpText3, [10, y - 26 * 5])
-    screen.blit(helpText4, [10, y - 26 * 4])
-    screen.blit(helpText5, [10, y - 26 * 3])
-    screen.blit(helpText6, [10, y - 26 * 2])
-    screen.blit(helpText7, [10, y - 26])
-    screen.blit(helpText8, [10, y])
+    for i in range(len(helpText)):
+        screen.blit(helpText[i], (10, y - 26 * (len(helpText) - 1 - i)))
     if y <= 0:
         instructionsdone = True
     pygame.display.flip()
@@ -639,7 +640,7 @@ while instructionsdone == False:
 
 
 draw()
-screen.blit(level1Text, [10, 10])
+screen.blit(levelText[0], [10, 10])
 pygame.display.flip()
 pygame.time.delay(1750)
 monsters = monsters1
@@ -665,13 +666,13 @@ while done==False and gameover==False:
         if mouseLastDown == False:
             for monster in monsters:
                 if monster.rect.collidepoint(pygame.mouse.get_pos()):
-                    sword.play()
+                    swordSound.play()
                     monster.kill()
             for gem in gems:
                 if gem.rect.collidepoint(pygame.mouse.get_pos()):
                     gem.remove()
                     numGems += 1
-                    getGem.play()
+                    getGemSound.play()
             for spell in sidebar.spells:
                 if spell.rect.collidepoint(pygame.mouse.get_pos()):
                     if numGems >= spell.cost:
@@ -700,7 +701,7 @@ while done==False and gameover==False:
                 gems = pygame.sprite.Group()
                 background.changeBackground(1)
                 draw()
-                screen.blit(level2Text, [10, 10])
+                screen.blit(levelText[1], [10, 10])
                 pygame.display.flip()
                 pygame.time.delay(1750)
                 monsters = monsters2
@@ -718,7 +719,7 @@ while done==False and gameover==False:
                 gems = pygame.sprite.Group()
                 background.changeBackground(2)
                 draw()
-                screen.blit(level3Text, [10, 10])
+                screen.blit(levelText[2], [10, 10])
                 pygame.display.flip()
                 pygame.time.delay(1750)
                 monsters = monsters3
@@ -736,7 +737,7 @@ while done==False and gameover==False:
                 gems = pygame.sprite.Group()
                 background.changeBackground(3)
                 draw()
-                screen.blit(level4Text, [10, 10])
+                screen.blit(levelText[3], [10, 10])
                 pygame.display.flip()
                 pygame.time.delay(1750)
                 monsters = monsters4
@@ -758,14 +759,8 @@ while done==False and gameover==False:
                         elif event.type == pygame.MOUSEBUTTONDOWN:
                             viewDone = True
                     screen.fill(BLACK)
-                    screen.blit(doneText1, [10, y - 26 * 7 - 5])
-                    screen.blit(doneText2, [10, y - 26 * 6])
-                    screen.blit(doneText3, [10, y - 26 * 5])
-                    screen.blit(doneText4, [10, y - 26 * 4])
-                    screen.blit(doneText5, [10, y - 26 * 3])
-                    screen.blit(doneText6, [10, y - 26 * 2])
-                    screen.blit(doneText7, [10, y - 26])
-                    screen.blit(doneText8, [10, y])
+                    for i in range(len(doneText)):
+                        screen.blit(doneText1, (10, y - 26 * (len(doneText) - 1 - i)))
                     if y <= 0:
                         viewDone = True
                     pygame.display.flip()
@@ -776,7 +771,7 @@ while done==False and gameover==False:
                 gems = pygame.sprite.Group()
                 background.changeBackground(4)
                 draw()
-                screen.blit(level5Text, [10, 10])
+                screen.blit(levelText[4], [10, 10])
                 pygame.display.flip()
                 pygame.time.delay(1750)
                 monsters = monsters5
@@ -794,7 +789,7 @@ while done==False and gameover==False:
                 gems = pygame.sprite.Group()
                 background.changeBackground(5)
                 draw()
-                screen.blit(level6Text, [10, 10])
+                screen.blit(levelText[5], [10, 10])
                 pygame.display.flip()
                 pygame.time.delay(1750)
                 monsters = monsters6
@@ -839,9 +834,9 @@ while done==False and gameover==False:
 
 if done==False:
     if youwin:
-        gameOverText = font.render("You Win!", 1, BLACK)
+        gameOverText = mainFont.render("You Win!", 1, BLACK)
     else:
-        gameOverText = font.render("You Lose!", 1, BLACK)
+        gameOverText = mainFont.render("You Lose!", 1, BLACK)
     screen.fill(WHITE)
     background.draw()
     sidebar.draw()
