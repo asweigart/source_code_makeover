@@ -237,7 +237,6 @@ done = False
 gameover = False
 finalWaveDone = False
 youwin = False
-mouseLastDown = False
 level = 1
 
 # Used to manage how fast the screen updates
@@ -300,7 +299,7 @@ whirlwindSound = pygame.mixer.Sound("sounds/whirlwind.wav")
 ghostSound     = pygame.mixer.Sound("sounds/ghost.wav")
 getGemSound    = pygame.mixer.Sound("sounds/pickupGem.wav")
 
-numGems = 90
+numGems = 0
 
 #background
 background = Background(('background1.png',
@@ -648,8 +647,10 @@ monsters = monsters1
 # - - -- - --- Main Program Loop - - -- - -- - ---
 while not done and not gameover:
     for event in pygame.event.get():
+
         if event.type == pygame.QUIT:
             done=True
+
         elif event.type == pygame.KEYDOWN:
             for spell in SPELL_STATS:
                 # cast spells if the hotkey was pressed
@@ -657,25 +658,21 @@ while not done and not gameover:
                 if event.key == ord(spell[5]) and numGems >= spell[3]:
                     numGems -= spell[3]
                     spell[4]()
-    if pygame.mouse.get_pressed()[0] == 1:
-        if not mouseLastDown:
+        elif event.type == pygame.MOUSEBUTTONDOWN:
             for monster in monsters:
-                if monster.rect.collidepoint(pygame.mouse.get_pos()):
+                if monster.rect.collidepoint(event.pos):
                     swordSound.play()
                     monster.kill()
             for gem in gems:
-                if gem.rect.collidepoint(pygame.mouse.get_pos()):
+                if gem.rect.collidepoint(event.pos):
                     gem.remove()
                     numGems += 1
                     getGemSound.play()
             for spell in sidebar.spells:
-                if spell.rect.collidepoint(pygame.mouse.get_pos()):
+                if spell.rect.collidepoint(event.pos):
                     if numGems >= spell.cost:
                         numGems -= spell.cost
                         spell.action()
-        mouseLastDown = True
-    else:
-        mouseLastDown = False
     current_time += 15
 
     i=0
