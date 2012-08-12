@@ -528,69 +528,16 @@ while not done and not gameover:
 
     i = len(monsters)
     if i == 0:
-        if level == 1:
-            if not finalWaveDone:
-                finalWaveDone = True
-                draw()
-                screen.blit(finalWaveText, [10, 10])
-                pygame.display.flip()
-                pygame.time.delay(1750)
-                monsters = finalWaves[0]
-            else:
-                finalWaveDone = False
-                level += 1
-                gems = pygame.sprite.Group()
-                background.changeBackground(1)
-                draw()
-                screen.blit(levelText[1], [10, 10])
-                pygame.display.flip()
-                pygame.time.delay(1750)
-                monsters = randomMonsters[1]
-        elif level == 2:
-            if not finalWaveDone:
-                finalWaveDone = True
-                draw()
-                screen.blit(finalWaveText, [10, 10])
-                pygame.display.flip()
-                pygame.time.delay(1750)
-                monsters = finalWaves[1]
-            else:
-                finalWaveDone = False
-                level += 1
-                gems = pygame.sprite.Group()
-                background.changeBackground(2)
-                draw()
-                screen.blit(levelText[2], [10, 10])
-                pygame.display.flip()
-                pygame.time.delay(1750)
-                monsters = randomMonsters[2]
-        elif level == 3:
-            if not finalWaveDone:
-                finalWaveDone = True
-                draw()
-                screen.blit(finalWaveText, [10, 10])
-                pygame.display.flip()
-                pygame.time.delay(1750)
-                monsters = finalWaves[2]
-            else:
-                finalWaveDone = False
-                level += 1
-                gems = pygame.sprite.Group()
-                background.changeBackground(3)
-                draw()
-                screen.blit(levelText[3], [10, 10])
-                pygame.display.flip()
-                pygame.time.delay(1750)
-                monsters = randomMonsters[3]
-        elif level == 4:
-            if not finalWaveDone:
-                finalWaveDone = True
-                draw()
-                screen.blit(finalWaveText, [10, 10])
-                pygame.display.flip()
-                pygame.time.delay(1750)
-                monsters = finalWaves[3]
-            else:
+        if not finalWaveDone:
+            finalWaveDone = True
+            draw()
+            screen.blit(finalWaveText, [10, 10])
+            pygame.display.flip()
+            pygame.time.delay(1750)
+            monsters = finalWaves[level - 1]
+        else:
+            if level == 4:
+                # after level 3, display doneText to the user
                 viewDone = False
                 y = WINDOW_HEIGHT + 27 * 6 + 5
                 while not viewDone:
@@ -607,42 +554,8 @@ while not done and not gameover:
                     pygame.display.flip()
                     y -= 1
                     clock.tick(20)
-                finalWaveDone = False
-                level += 1
-                gems = pygame.sprite.Group()
-                background.changeBackground(4)
-                draw()
-                screen.blit(levelText[4], [10, 10])
-                pygame.display.flip()
-                pygame.time.delay(1750)
-                monsters = randomMonsters[4]
-        elif level == 5:
-            if not finalWaveDone:
-                finalWaveDone = True
-                draw()
-                screen.blit(finalWaveText, [10, 10])
-                pygame.display.flip()
-                pygame.time.delay(1750)
-                monsters = finalWaves[4]
-            else:
-                finalWaveDone = False
-                level += 1
-                gems = pygame.sprite.Group()
-                background.changeBackground(5)
-                draw()
-                screen.blit(levelText[5], [10, 10])
-                pygame.display.flip()
-                pygame.time.delay(1750)
-                monsters = randomMonsters[5]
-        elif level == 6:
-            if not finalWaveDone:
-                finalWaveDone = True
-                draw()
-                screen.blit(finalWaveText, [10, 10])
-                pygame.display.flip()
-                pygame.time.delay(1750)
-                monsters = finalWaves[5]
-            else:
+            if level == 6:
+                # player has beaten the last level of the game, display done2Text
                 viewDone = False
                 y = WINDOW_HEIGHT + 27 * 2 + 5
                 while not viewDone:
@@ -652,9 +565,8 @@ while not done and not gameover:
                         elif event.type == pygame.MOUSEBUTTONDOWN:
                             viewDone = True
                     screen.fill(BLACK)
-                    screen.blit(done2Text1, [10, y - 26 * 2 - 5])
-                    screen.blit(done2Text2, [10, y - 26])
-                    screen.blit(done2Text3, [10, y])
+                    for j in range(len(done2Text)):
+                        screen.blit(done2Text[j], [10, y - 26 * (len(done2Text) - 1 - j)])
                     if y <= 0:
                         viewDone = True
                     pygame.display.flip()
@@ -662,6 +574,16 @@ while not done and not gameover:
                     clock.tick(20)
                 gameover = True
                 youwin = True
+
+            finalWaveDone = False
+            level += 1
+            gems = pygame.sprite.Group()
+            background.changeBackground(level - 1)
+            draw()
+            screen.blit(levelText[1], [10, 10])
+            pygame.display.flip()
+            pygame.time.delay(1750)
+            monsters = randomMonsters[level - 1]
 
     if random.randint(0, 150) == 150:
         gem = copy.copy(gemTemplate)
