@@ -332,10 +332,17 @@ MONSTER_STATS = {'bat':        {'image': ('bats.bmp',       30, 29, 5),  'life':
                  'soul tree':  {'image': ('soultree.bmp',   69, 86, 4),  'life': 10, 'speed': 3},
                  'tablet':     {'image': ('tablets.bmp',    37, 54, 4),  'life': 15, 'speed': 3},
                  'tree':       {'image': ('trunks.bmp',     62, 65, 6),  'life': 8,  'speed': 1}}
+MONSTER_RATIOS = (('bat') * 4 + ('plant') * 3 + ('orc') * 2 + ('orc2', 'slime'),
+                  ('bat') * 2 + ('tree') + ('plant') * 4 + ('orc2') * 2 + ('slime') * 2,
+                  ('dino') * 4 + ('orc2') * 2 + ('ogre') * 2 + ('plant', 'orc', 'slime'),
+                  ('bat') * 2 + ('ogre') * 2 + ('skeleton') * 4 + ('orc') * 2 + ('slime') * 2 + ('tree', 'orc2'),
+                  ('golem', 'plant') + ('genie') * 2 + ('orc') * 2 + ('skeleton') * 2,
+                  ('bat') * 4 + ('orc2') * 4 + ('slime') * 6 + ('skeleton') * 4 + ('ogre') * 6 + ('dino') * 2 + ('demon', 'tablet'))
+
 current_time = 1
 #Level 1
 for i in range(random.randint(10, 20)):
-    type = random.choice(["bat", "bat", "bat", "bat", "plant", "plant", "plant", "orc", "orc", "orc2", "slime"])
+    type = random.choice(MONSTER_RATIOS[0])
     m = Monster(screen, *MONSTER_STATS[type]["image"])
     m.update(1, False)
     m.set_rect(random.randint( - 500, -1), random.randint(25, WINDOW_HEIGHT - 70 - SIDEBAR_HEIGHT))
@@ -365,7 +372,7 @@ for i in range(10):
 monsters2 = pygame.sprite.Group()
 finalWave2 = pygame.sprite.Group()
 for i in range(random.randint(35, 40)):
-    type = random.choice(["bat", "bat", "tree", "plant", "plant", "plant", "plant", "orc2", "orc2", "slime", "slime"])
+    type = random.choice(MONSTER_RATIOS[1])
     m = Monster(screen, *MONSTER_STATS[type]["image"])
     m.update(1, False)
     m.set_rect(random.randint( - 550, -1), random.randint(25, WINDOW_HEIGHT - 70 - SIDEBAR_HEIGHT))
@@ -399,7 +406,7 @@ for i in range(21):
 monsters3 = pygame.sprite.Group()
 finalWave3 = pygame.sprite.Group()
 for i in range(random.randint(25, 30)):
-    type = random.choice(["dino", "dino", "dino", "plant", "orc2", "orc2", "orc", "dino", "ogre", "ogre", "slime"])
+    type = random.choice(MONSTER_RATIOS[2])
     m = Monster(screen, *MONSTER_STATS[type]["image"])
     m.update(1, False)
     m.set_rect(random.randint( - 650, -1), random.randint(25, WINDOW_HEIGHT - 70 - SIDEBAR_HEIGHT))
@@ -429,7 +436,7 @@ for i in range(21):
 monsters4 = pygame.sprite.Group()
 finalWave4 = pygame.sprite.Group()
 for i in range(random.randint(45, 65)):
-    type = random.choice(["bat", "bat", "ogre", "ogre", "skeleton", "skeleton", "skeleton", "skeleton", "tree", "orc", "orc2", "orc", "slime", "slime"])
+    type = random.choice(MONSTER_RATIOS[3])
     m = Monster(screen, *MONSTER_STATS[type]["image"])
     m.update(1, False)
     m.set_rect(random.randint( - 1000, -1), random.randint(25, WINDOW_HEIGHT - 70 - SIDEBAR_HEIGHT))
@@ -471,7 +478,7 @@ for i in range(21):
 monsters5 = pygame.sprite.Group()
 finalWave5 = pygame.sprite.Group()
 for i in range(random.randint(12, 16)):
-    type = random.choice(["golem", "genie", "genie", "plant", "orc", "orc", "skeleton", "skeleton"])
+    type = random.choice(MONSTER_RATIOS[4])
     m = Monster(screen, *MONSTER_STATS[type]["image"])
     m.update(1, False)
     m.set_rect(random.randint( - 550, -1), random.randint(25, WINDOW_HEIGHT - 70 - SIDEBAR_HEIGHT))
@@ -501,7 +508,7 @@ for i in range(12):
 monsters6 = pygame.sprite.Group()
 finalWave6 = pygame.sprite.Group()
 for i in range(random.randint(38, 43)):
-    type = random.choice(["bat", "bat", "orc2", "orc2", "slime", "slime", "slime", "skeleton", "skeleton", "ogre", "ogre", "ogre", "dino", "bat", "bat", "orc2", "orc2", "slime", "slime", "slime", "skeleton", "skeleton", "ogre", "ogre", "ogre", "dino", "demon", "tablet"])
+    type = random.choice(MONSTER_RATIOS[5])
     m = Monster(screen, *MONSTER_STATS[type]["image"])
     m.update(1, False)
     m.set_rect(random.randint( - 2000, -1), random.randint(25, WINDOW_HEIGHT - 70 - SIDEBAR_HEIGHT))
@@ -675,9 +682,7 @@ while not done and not gameover:
                         spell.action()
     current_time += 15
 
-    i=0
-    for monster in monsters:
-        i+=1
+    i = len(monsters)
     if i == 0:
         if level == 1:
             if not finalWaveDone:
