@@ -404,29 +404,11 @@ randomMonsters = [pygame.sprite.Group() for x in range(6)]
 finalWaves = [pygame.sprite.Group() for x in range(6)]
 
 current_time = 1
-#Level 1
-randomMonsters[0] = populateRandomMonsters(1)
-finalWaves[0] = populateFinalWave(1)
 
-#Level 2
-randomMonsters[1] = populateRandomMonsters(2)
-finalWaves[1] = populateFinalWave(2)
-
-#Level 3
-randomMonsters[2] = populateRandomMonsters(3)
-finalWaves[2] = populateFinalWave(3)
-
-#Level 4
-randomMonsters[3] = populateRandomMonsters(4)
-finalWaves[3] = populateFinalWave(4)
-
-#Level 5
-randomMonsters[4] = populateRandomMonsters(5)
-finalWaves[4] = populateFinalWave(5)
-
-#Level 6
-randomMonsters[5] = populateRandomMonsters(6)
-finalWaves[5] = populateFinalWave(6)
+# add monsters to random and final wave sprite groups for all 6 levels.
+for i in range(6):
+    randomMonsters[i] = populateRandomMonsters(i + 1)
+    finalWaves[i] = populateFinalWave(i + 1)
 
 #spells
 fireballs = pygame.sprite.Group()
