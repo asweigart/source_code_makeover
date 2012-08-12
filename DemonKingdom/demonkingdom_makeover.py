@@ -381,7 +381,7 @@ def populateFinalWave(level):
 
 monsters = pygame.sprite.Group()
 monsters1 = pygame.sprite.Group()
-finalWave1 = pygame.sprite.Group()
+finalWaves = [pygame.sprite.Group() for x in range(6)]
 
 current_time = 1
 #Level 1
@@ -392,11 +392,10 @@ for i in range(random.randint(10, 20)):
     m.set_speed(MONSTER_STATS[type]["speed"])
     m.set_life(MONSTER_STATS[type]["life"])
     monsters1.add(m)
-finalWave1 = populateFinalWave(1)
+finalWaves[0] = populateFinalWave(1)
 
 #Level 2
 monsters2 = pygame.sprite.Group()
-finalWave2 = pygame.sprite.Group()
 for i in range(random.randint(35, 40)):
     type = random.choice(MONSTER_RATIOS[1])
     m = Monster(screen, *MONSTER_STATS[type]["image"])
@@ -404,11 +403,10 @@ for i in range(random.randint(35, 40)):
     m.set_speed(MONSTER_STATS[type]["speed"])
     m.set_life(MONSTER_STATS[type]["life"])
     monsters2.add(m)
-finalWave2 = populateFinalWave(2)
+finalWaves[1] = populateFinalWave(2)
 
 #Level 3
 monsters3 = pygame.sprite.Group()
-finalWave3 = pygame.sprite.Group()
 for i in range(random.randint(25, 30)):
     type = random.choice(MONSTER_RATIOS[2])
     m = Monster(screen, *MONSTER_STATS[type]["image"])
@@ -416,11 +414,10 @@ for i in range(random.randint(25, 30)):
     m.set_speed(MONSTER_STATS[type]["speed"])
     m.set_life(MONSTER_STATS[type]["life"])
     monsters3.add(m)
-finalWave3 = populateFinalWave(3)
+finalWaves[2] = populateFinalWave(3)
 
 #Level 4
 monsters4 = pygame.sprite.Group()
-finalWave4 = pygame.sprite.Group()
 for i in range(random.randint(45, 65)):
     type = random.choice(MONSTER_RATIOS[3])
     m = Monster(screen, *MONSTER_STATS[type]["image"])
@@ -428,11 +425,10 @@ for i in range(random.randint(45, 65)):
     m.set_speed(MONSTER_STATS[type]["speed"])
     m.set_life(MONSTER_STATS[type]["life"])
     monsters4.add(m)
-finalWave4 = populateFinalWave(4)
+finalWaves[3] = populateFinalWave(4)
 
 #Level 5
 monsters5 = pygame.sprite.Group()
-finalWave5 = pygame.sprite.Group()
 for i in range(random.randint(12, 16)):
     type = random.choice(MONSTER_RATIOS[4])
     m = Monster(screen, *MONSTER_STATS[type]["image"])
@@ -440,11 +436,10 @@ for i in range(random.randint(12, 16)):
     m.set_speed(MONSTER_STATS[type]["speed"])
     m.set_life(MONSTER_STATS[type]["life"])
     monsters5.add(m)
-finalWave5 = populateFinalWave(5)
+finalWaves[4] = populateFinalWave(5)
 
 #Level 6
 monsters6 = pygame.sprite.Group()
-finalWave6 = pygame.sprite.Group()
 for i in range(random.randint(38, 43)):
     type = random.choice(MONSTER_RATIOS[5])
     m = Monster(screen, *MONSTER_STATS[type]["image"])
@@ -452,7 +447,7 @@ for i in range(random.randint(38, 43)):
     m.set_speed(MONSTER_STATS[type]["speed"])
     m.set_life(MONSTER_STATS[type]["life"])
     monsters6.add(m)
-finalWave6 = populateFinalWave(6)
+finalWaves[5] = populateFinalWave(6)
 
 #spells
 fireballs = pygame.sprite.Group()
@@ -599,7 +594,7 @@ while not done and not gameover:
                 screen.blit(finalWaveText, [10, 10])
                 pygame.display.flip()
                 pygame.time.delay(1750)
-                monsters = finalWave1
+                monsters = finalWaves[0]
             else:
                 finalWaveDone = False
                 level += 1
@@ -617,7 +612,7 @@ while not done and not gameover:
                 screen.blit(finalWaveText, [10, 10])
                 pygame.display.flip()
                 pygame.time.delay(1750)
-                monsters = finalWave2
+                monsters = finalWaves[1]
             else:
                 finalWaveDone = False
                 level += 1
@@ -635,7 +630,7 @@ while not done and not gameover:
                 screen.blit(finalWaveText, [10, 10])
                 pygame.display.flip()
                 pygame.time.delay(1750)
-                monsters = finalWave3
+                monsters = finalWaves[2]
             else:
                 finalWaveDone = False
                 level += 1
@@ -653,7 +648,7 @@ while not done and not gameover:
                 screen.blit(finalWaveText, [10, 10])
                 pygame.display.flip()
                 pygame.time.delay(1750)
-                monsters = finalWave4
+                monsters = finalWaves[3]
             else:
                 viewDone = False
                 y = WINDOW_HEIGHT + 27 * 6 + 5
@@ -687,7 +682,7 @@ while not done and not gameover:
                 screen.blit(finalWaveText, [10, 10])
                 pygame.display.flip()
                 pygame.time.delay(1750)
-                monsters = finalWave5
+                monsters = finalWaves[4]
             else:
                 finalWaveDone = False
                 level += 1
@@ -705,7 +700,7 @@ while not done and not gameover:
                 screen.blit(finalWaveText, [10, 10])
                 pygame.display.flip()
                 pygame.time.delay(1750)
-                monsters = finalWave6
+                monsters = finalWaves[5]
             else:
                 viewDone = False
                 y = WINDOW_HEIGHT + 27 * 2 + 5
