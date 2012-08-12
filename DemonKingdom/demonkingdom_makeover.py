@@ -123,9 +123,9 @@ class Monster(AnimatedSprite):
     def set_life(self, life):
         self.life = life
         self.whole_life = life
-    def update(self, time, move=True):
+    def update(self, current_time, move=True):
         global gameover
-        AnimatedSprite.update(self, time)
+        AnimatedSprite.update(self, current_time)
         if move:
             self.rect.left += self.speed
             screen.blit(self.image, self.rect)
@@ -149,8 +149,8 @@ class Gem(AnimatedSprite):
     def __init__(self, target):
         super(Gem, self).__init__(target, 'gems.bmp', 18, 32, 6)
 
-    def update(self, time, move=True):
-        AnimatedSprite.update(self, time)
+    def update(self, current_time, move=True):
+        AnimatedSprite.update(self, current_time)
         if move:
             screen.blit(self.image, self.rect)
 
@@ -189,8 +189,8 @@ class Logo(pygame.sprite.Sprite):
 class SpellEffect(AnimatedSprite):
     def set_speed(self, speed):
         self.speed = speed
-    def update(self, time, move=True):
-        AnimatedSprite.update(self, time)
+    def update(self, current_time, move=True):
+        AnimatedSprite.update(self, current_time)
         if move:
             self.rect.left += self.speed[0]
             self.rect.top += self.speed[1]
@@ -323,7 +323,7 @@ MONSTER_STATS = {'bat':        {'image': ('bats.bmp',       30, 29, 5),  'life':
                  'soul tree':  {'image': ('soultree.bmp',   69, 86, 4),  'life': 10, 'speed': 3},
                  'tablet':     {'image': ('tablets.bmp',    37, 54, 4),  'life': 15, 'speed': 3},
                  'tree':       {'image': ('trunks.bmp',     62, 65, 6),  'life': 8,  'speed': 1}}
-time = 1
+current_time = 1
 #Level 1
 for i in range(random.randint(10, 20)):
     type = random.choice(["bat", "bat", "bat", "bat", "plant", "plant", "plant", "orc", "orc", "orc2", "slime"])
@@ -558,11 +558,11 @@ def draw():
     background.draw()
     sidebar.draw()
     for monster in monsters:
-        monster.update(time)
+        monster.update(current_time)
     for gem in gems:
-        gem.update(time)
+        gem.update(current_time)
     for fireball in fireballs:
-        fireball.update(time)
+        fireball.update(current_time)
         if fireball.rect.bottom >= WINDOW_HEIGHT - SIDEBAR_HEIGHT - 5:
             fireballs.remove(fireball)
             fireballsOff.add(fireball)
@@ -575,7 +575,7 @@ def draw():
             fireballs.remove(fireball)
             fireballsOff.add(fireball)
     for whirlwind in whirlwinds:
-        whirlwind.update(time)
+        whirlwind.update(current_time)
         if whirlwind.rect.left <= 5:
             whirlwinds.remove(whirlwind)
             whirlwindsOff.add(whirlwind)
@@ -586,7 +586,7 @@ def draw():
                     for i in range(hit.life):
                         hit.kill()
     for ghost in ghosts:
-        ghost.update(time)
+        ghost.update(current_time)
         if ghost.rect.left >= WINDOW_WIDTH - 5:
             ghosts.remove(ghost)
             ghostsOff.add(ghost)
@@ -680,7 +680,7 @@ while done==False and gameover==False:
         mouseLastDown = True
     else:
         mouseLastDown = False
-    time+=15
+    current_time += 15
 
     i=0
     for monster in monsters:
