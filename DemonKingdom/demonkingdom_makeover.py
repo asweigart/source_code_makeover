@@ -601,7 +601,7 @@ while not done and not gameover:
                             viewDone = True
                     screen.fill(BLACK)
                     for i in range(len(doneText)):
-                        screen.blit(doneText1, (10, y - 26 * (len(doneText) - 1 - i)))
+                        screen.blit(doneText[i], (10, y - 26 * (len(doneText) - 1 - i)))
                     if y <= 0:
                         viewDone = True
                     pygame.display.flip()
