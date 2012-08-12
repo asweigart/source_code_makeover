@@ -199,11 +199,12 @@ class SpellEffect(AnimatedSprite):
             screen.blit(self.image, self.rect)
 
 def castFireBall():
+    for i in range(4):
+        effect = SpellEffect(screen, "fireballSpell.bmp", 16, 48, 6)
+        effect.set_rect(random.randint(30, WINDOW_WIDTH - 30), -10)
+        effect.set_speed([0, 5])
+        fireballs.add(effect)
     fireballSound.play()
-    for fireball in fireballsOff:
-        fireballsOff.remove(fireball)
-        fireball.set_rect(random.randint(30, WINDOW_WIDTH - 30), -10)
-        fireballs.add(fireball)
 
 def castWhirlWind():
     whirlwindSound.play()
@@ -412,12 +413,6 @@ for i in range(6):
 
 #spells
 fireballs = pygame.sprite.Group()
-fireballsOff = pygame.sprite.Group()
-for i in range(4):
-    effect = SpellEffect(screen, "fireballSpell.bmp", 16, 48, 6)
-    effect.set_rect(0, 0)
-    effect.set_speed([0, 5])
-    fireballsOff.add(effect)
 whirlwinds = pygame.sprite.Group()
 whirlwindsOff = pygame.sprite.Group()
 effect = SpellEffect(screen, "whirlwindSpell.bmp", 29, 32, 2)
@@ -445,15 +440,12 @@ def draw():
         fireball.update(current_time)
         if fireball.rect.bottom >= WINDOW_HEIGHT - SIDEBAR_HEIGHT - 5:
             fireballs.remove(fireball)
-            fireballsOff.add(fireball)
         hits = pygame.sprite.spritecollide(fireball, monsters, False)
         if hits:
             for hit in hits:
-                hit.kill()
-                hit.kill()
-                hit.kill()
+                for i in range(3):
+                    hit.kill()
             fireballs.remove(fireball)
-            fireballsOff.add(fireball)
     for whirlwind in whirlwinds:
         whirlwind.update(current_time)
         if whirlwind.rect.left <= 5:
