@@ -36,18 +36,19 @@ class Background(pygame.sprite.Sprite):
 
 class Sidebar():
     def __init__(self):
+        global SPELL_STATS
         self.font = pygame.font.Font(None, 22)
         self.numGemsCache = numGems
         self.gemsText = self.font.render(str(numGems) + " gems", 1, LIGHT_GRAY)
         self.spells = pygame.sprite.Group()
 
-        #          image filename,      x,   y,               cost, function,    hotkey
-        spells = (('fireballIcon.bmp',  100, MAP_HEIGHT + 30, 5,  castFireBall,  1),
-                  ('whirlwindIcon.bmp', 170, MAP_HEIGHT + 30, 8,  castWhirlWind, 2),
-                  ('ghostIcon.bmp',     240, MAP_HEIGHT + 30, 10, castGhost,     3))
+        #               image filename,      x,   y,               cost, function,    hotkey
+        SPELL_STATS = (('fireballIcon.bmp',  100, MAP_HEIGHT + 30, 5,  castFireBall,  '1'),
+                       ('whirlwindIcon.bmp', 170, MAP_HEIGHT + 30, 8,  castWhirlWind, '2'),
+                       ('ghostIcon.bmp',     240, MAP_HEIGHT + 30, 10, castGhost,     '3'))
 
-        for spell in spells:
-            spell = SpellIcon(pygame.image.load('images/' + spell[0]), spell[1], spell[2], spell[3], spell[4], spell[5])
+        for spell in SPELL_STATS:
+            spell = SpellIcon(pygame.image.load('images/' + spell[0]), *spell[1:])
             self.spells.add(spell)
 
         self.logo = Logo(pygame.image.load("images/logo.bmp"), 360, 370)
@@ -299,7 +300,7 @@ whirlwindSound = pygame.mixer.Sound("sounds/whirlwind.wav")
 ghostSound     = pygame.mixer.Sound("sounds/ghost.wav")
 getGemSound    = pygame.mixer.Sound("sounds/pickupGem.wav")
 
-numGems = 0
+numGems = 90
 
 #background
 background = Background(('background1.png',
@@ -650,18 +651,12 @@ while not done and not gameover:
         if event.type == pygame.QUIT:
             done=True
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_1:
-                if numGems >= 5:
-                    numGems -= 5
-                    castFireBall()
-            elif event.key == pygame.K_2:
-                if numGems >= 8:
-                    numGems -= 8
-                    castWhirlWind()
-            elif event.key == pygame.K_3:
-                if numGems >= 10:
-                    numGems -= 10
-                    castGhost()
+            for spell in SPELL_STATS:
+                # cast spells if the hotkey was pressed
+                # spell[5] is hotkey, spell[3] is cost, spell[4] is function
+                if event.key == ord(spell[5]) and numGems >= spell[3]:
+                    numGems -= spell[3]
+                    spell[4]()
     if pygame.mouse.get_pressed()[0] == 1:
         if not mouseLastDown:
             for monster in monsters:
