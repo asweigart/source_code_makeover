@@ -607,7 +607,7 @@ def draw():
 
 introdone = False
 y = WINDOW_HEIGHT + 26 * 3 + 5
-while introdone == False:
+while not introdone:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
@@ -623,7 +623,7 @@ while introdone == False:
     clock.tick(20)
 instructionsdone = False
 y = WINDOW_HEIGHT + 26 * 7 + 5
-while instructionsdone == False:
+while not instructionsdone:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
@@ -645,7 +645,7 @@ pygame.display.flip()
 pygame.time.delay(1750)
 monsters = monsters1
 # - - -- - --- Main Program Loop - - -- - -- - ---
-while done==False and gameover==False:
+while not done and not gameover:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done=True
@@ -663,7 +663,7 @@ while done==False and gameover==False:
                     numGems -= 10
                     castGhost()
     if pygame.mouse.get_pressed()[0] == 1:
-        if mouseLastDown == False:
+        if not mouseLastDown:
             for monster in monsters:
                 if monster.rect.collidepoint(pygame.mouse.get_pos()):
                     swordSound.play()
@@ -688,7 +688,7 @@ while done==False and gameover==False:
         i+=1
     if i == 0:
         if level == 1:
-            if finalWaveDone == False:
+            if not finalWaveDone:
                 finalWaveDone = True
                 draw()
                 screen.blit(finalWaveText, [10, 10])
@@ -706,7 +706,7 @@ while done==False and gameover==False:
                 pygame.time.delay(1750)
                 monsters = monsters2
         elif level == 2:
-            if finalWaveDone == False:
+            if not finalWaveDone:
                 finalWaveDone = True
                 draw()
                 screen.blit(finalWaveText, [10, 10])
@@ -724,7 +724,7 @@ while done==False and gameover==False:
                 pygame.time.delay(1750)
                 monsters = monsters3
         elif level == 3:
-            if finalWaveDone == False:
+            if not finalWaveDone:
                 finalWaveDone = True
                 draw()
                 screen.blit(finalWaveText, [10, 10])
@@ -742,7 +742,7 @@ while done==False and gameover==False:
                 pygame.time.delay(1750)
                 monsters = monsters4
         elif level == 4:
-            if finalWaveDone == False:
+            if not finalWaveDone:
                 finalWaveDone = True
                 draw()
                 screen.blit(finalWaveText, [10, 10])
@@ -752,7 +752,7 @@ while done==False and gameover==False:
             else:
                 viewDone = False
                 y = WINDOW_HEIGHT + 27 * 6 + 5
-                while viewDone == False:
+                while not viewDone:
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
                             sys.exit()
@@ -776,7 +776,7 @@ while done==False and gameover==False:
                 pygame.time.delay(1750)
                 monsters = monsters5
         elif level == 5:
-            if finalWaveDone == False:
+            if not finalWaveDone:
                 finalWaveDone = True
                 draw()
                 screen.blit(finalWaveText, [10, 10])
@@ -794,7 +794,7 @@ while done==False and gameover==False:
                 pygame.time.delay(1750)
                 monsters = monsters6
         elif level == 6:
-            if finalWaveDone == False:
+            if not finalWaveDone:
                 finalWaveDone = True
                 draw()
                 screen.blit(finalWaveText, [10, 10])
@@ -804,7 +804,7 @@ while done==False and gameover==False:
             else:
                 viewDone = False
                 y = WINDOW_HEIGHT + 27 * 2 + 5
-                while viewDone == False:
+                while not viewDone:
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
                             sys.exit()
@@ -832,7 +832,7 @@ while done==False and gameover==False:
     # Limit to 20 frames per second
     clock.tick(20)
 
-if done==False:
+if not done:
     if youwin:
         gameOverText = mainFont.render("You Win!", 1, BLACK)
     else:
@@ -842,7 +842,7 @@ if done==False:
     sidebar.draw()
     screen.blit(gameOverText, [10, 10])
     pygame.display.flip()
-    while done==False:
+    while not done:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 done=True
