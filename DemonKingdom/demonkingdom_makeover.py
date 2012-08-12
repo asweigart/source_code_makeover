@@ -90,6 +90,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
 
         self.columns = columns
         self.last_time = 0
+        self.update(1, False)
 
     def update(self, current_time, rate=30):
         #update animation frame number
@@ -332,19 +333,18 @@ MONSTER_STATS = {'bat':        {'image': ('bats.bmp',       30, 29, 5),  'life':
                  'soul tree':  {'image': ('soultree.bmp',   69, 86, 4),  'life': 10, 'speed': 3},
                  'tablet':     {'image': ('tablets.bmp',    37, 54, 4),  'life': 15, 'speed': 3},
                  'tree':       {'image': ('trunks.bmp',     62, 65, 6),  'life': 8,  'speed': 1}}
-MONSTER_RATIOS = (('bat') * 4 + ('plant') * 3 + ('orc') * 2 + ('orc2', 'slime'),
-                  ('bat') * 2 + ('tree') + ('plant') * 4 + ('orc2') * 2 + ('slime') * 2,
-                  ('dino') * 4 + ('orc2') * 2 + ('ogre') * 2 + ('plant', 'orc', 'slime'),
-                  ('bat') * 2 + ('ogre') * 2 + ('skeleton') * 4 + ('orc') * 2 + ('slime') * 2 + ('tree', 'orc2'),
-                  ('golem', 'plant') + ('genie') * 2 + ('orc') * 2 + ('skeleton') * 2,
-                  ('bat') * 4 + ('orc2') * 4 + ('slime') * 6 + ('skeleton') * 4 + ('ogre') * 6 + ('dino') * 2 + ('demon', 'tablet'))
+MONSTER_RATIOS = (('bat',) * 4 + ('plant',) * 3 + ('orc',) * 2 + ('orc2', 'slime'),
+                  ('bat',) * 2 + ('tree',) + ('plant',) * 4 + ('orc2',) * 2 + ('slime',) * 2,
+                  ('dino',) * 4 + ('orc2',) * 2 + ('ogre',) * 2 + ('plant', 'orc', 'slime'),
+                  ('bat',) * 2 + ('ogre',) * 2 + ('skeleton',) * 4 + ('orc',) * 2 + ('slime',) * 2 + ('tree', 'orc2'),
+                  ('golem', 'plant') + ('genie',) * 2 + ('orc',) * 2 + ('skeleton',) * 2,
+                  ('bat',) * 4 + ('orc2',) * 4 + ('slime',) * 6 + ('skeleton',) * 4 + ('ogre',) * 6 + ('dino',) * 2 + ('demon', 'tablet'))
 
 current_time = 1
 #Level 1
 for i in range(random.randint(10, 20)):
     type = random.choice(MONSTER_RATIOS[0])
     m = Monster(screen, *MONSTER_STATS[type]["image"])
-    m.update(1, False)
     m.set_rect(random.randint( - 500, -1), random.randint(25, WINDOW_HEIGHT - 70 - SIDEBAR_HEIGHT))
     m.set_speed(MONSTER_STATS[type]["speed"])
     m.set_life(MONSTER_STATS[type]["life"])
@@ -363,7 +363,6 @@ for i in range(10):
         max = -60
         type = "golem"
     m = Monster(screen, *MONSTER_STATS[type]["image"])
-    m.update(1, False)
     m.set_rect(random.randint(max, min), random.randint(25, WINDOW_HEIGHT - 85 - SIDEBAR_HEIGHT))
     m.set_speed(MONSTER_STATS[type]["speed"])
     m.set_life(MONSTER_STATS[type]["life"])
@@ -374,7 +373,6 @@ finalWave2 = pygame.sprite.Group()
 for i in range(random.randint(35, 40)):
     type = random.choice(MONSTER_RATIOS[1])
     m = Monster(screen, *MONSTER_STATS[type]["image"])
-    m.update(1, False)
     m.set_rect(random.randint( - 550, -1), random.randint(25, WINDOW_HEIGHT - 70 - SIDEBAR_HEIGHT))
     m.set_speed(MONSTER_STATS[type]["speed"])
     m.set_life(MONSTER_STATS[type]["life"])
@@ -397,7 +395,6 @@ for i in range(21):
         min = -30
         max = -60
     m = Monster(screen, *MONSTER_STATS[type]["image"])
-    m.update(1, False)
     m.set_rect(random.randint(max, min), random.randint(25, WINDOW_HEIGHT - 85 - SIDEBAR_HEIGHT))
     m.set_speed(MONSTER_STATS[type]["speed"])
     m.set_life(MONSTER_STATS[type]["life"])
@@ -408,7 +405,6 @@ finalWave3 = pygame.sprite.Group()
 for i in range(random.randint(25, 30)):
     type = random.choice(MONSTER_RATIOS[2])
     m = Monster(screen, *MONSTER_STATS[type]["image"])
-    m.update(1, False)
     m.set_rect(random.randint( - 650, -1), random.randint(25, WINDOW_HEIGHT - 70 - SIDEBAR_HEIGHT))
     m.set_speed(MONSTER_STATS[type]["speed"])
     m.set_life(MONSTER_STATS[type]["life"])
@@ -427,7 +423,6 @@ for i in range(21):
         min = -30
         max = -60
     m = Monster(screen, *MONSTER_STATS[type]["image"])
-    m.update(1, False)
     m.set_rect(random.randint(max, min), random.randint(25, WINDOW_HEIGHT - 85 - SIDEBAR_HEIGHT))
     m.set_speed(MONSTER_STATS[type]["speed"])
     m.set_life(MONSTER_STATS[type]["life"])
@@ -438,7 +433,6 @@ finalWave4 = pygame.sprite.Group()
 for i in range(random.randint(45, 65)):
     type = random.choice(MONSTER_RATIOS[3])
     m = Monster(screen, *MONSTER_STATS[type]["image"])
-    m.update(1, False)
     m.set_rect(random.randint( - 1000, -1), random.randint(25, WINDOW_HEIGHT - 70 - SIDEBAR_HEIGHT))
     m.set_speed(MONSTER_STATS[type]["speed"])
     m.set_life(MONSTER_STATS[type]["life"])
@@ -469,7 +463,6 @@ for i in range(21):
         min = -200
         max = -200
     m = Monster(screen, *MONSTER_STATS[type]["image"])
-    m.update(1, False)
     m.set_rect(random.randint(max, min), random.randint(25, WINDOW_HEIGHT - 85 - SIDEBAR_HEIGHT))
     m.set_speed(MONSTER_STATS[type]["speed"])
     m.set_life(MONSTER_STATS[type]["life"])
@@ -480,7 +473,6 @@ finalWave5 = pygame.sprite.Group()
 for i in range(random.randint(12, 16)):
     type = random.choice(MONSTER_RATIOS[4])
     m = Monster(screen, *MONSTER_STATS[type]["image"])
-    m.update(1, False)
     m.set_rect(random.randint( - 550, -1), random.randint(25, WINDOW_HEIGHT - 70 - SIDEBAR_HEIGHT))
     m.set_speed(MONSTER_STATS[type]["speed"])
     m.set_life(MONSTER_STATS[type]["life"])
@@ -499,7 +491,6 @@ for i in range(12):
         min = -30
         max = -60
     m = Monster(screen, *MONSTER_STATS[type]["image"])
-    m.update(1, False)
     m.set_rect(random.randint(max, min), random.randint(25, WINDOW_HEIGHT - 85 - SIDEBAR_HEIGHT))
     m.set_speed(MONSTER_STATS[type]["speed"])
     m.set_life(MONSTER_STATS[type]["life"])
@@ -510,7 +501,6 @@ finalWave6 = pygame.sprite.Group()
 for i in range(random.randint(38, 43)):
     type = random.choice(MONSTER_RATIOS[5])
     m = Monster(screen, *MONSTER_STATS[type]["image"])
-    m.update(1, False)
     m.set_rect(random.randint( - 2000, -1), random.randint(25, WINDOW_HEIGHT - 70 - SIDEBAR_HEIGHT))
     m.set_speed(MONSTER_STATS[type]["speed"])
     m.set_life(MONSTER_STATS[type]["life"])
@@ -537,7 +527,6 @@ for i in range(15):
         min = -30
         max = -60
     m = Monster(screen, *MONSTER_STATS[type]["image"])
-    m.update(1, False)
     m.set_rect(random.randint(max, min), random.randint(25, WINDOW_HEIGHT - 85 - SIDEBAR_HEIGHT))
     m.set_speed(MONSTER_STATS[type]["speed"])
     m.set_life(MONSTER_STATS[type]["life"])
@@ -548,14 +537,12 @@ fireballs = pygame.sprite.Group()
 fireballsOff = pygame.sprite.Group()
 for i in range(4):
     effect = SpellEffect(screen, "fireballSpell.bmp", 16, 48, 6)
-    effect.update(1, False)
     effect.set_rect(0, 0)
     effect.set_speed([0, 5])
     fireballsOff.add(effect)
 whirlwinds = pygame.sprite.Group()
 whirlwindsOff = pygame.sprite.Group()
 effect = SpellEffect(screen, "whirlwindSpell.bmp", 29, 32, 2)
-effect.update(1, False)
 effect.set_rect(0, 0)
 effect.set_speed([ - 10, 0])
 whirlwindsOff.add(effect)
@@ -564,7 +551,6 @@ ghosts = pygame.sprite.Group()
 ghostsOff = pygame.sprite.Group()
 for i in range(6):
     effect = SpellEffect(screen, "ghostSpell.bmp", 32, 32, 2)
-    effect.update(1, False)
     effect.set_rect(0, 0)
     effect.set_speed([12, 0])
     ghostsOff.add(effect)
