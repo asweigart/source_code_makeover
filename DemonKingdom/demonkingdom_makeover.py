@@ -207,18 +207,20 @@ def castFireBall():
     fireballSound.play()
 
 def castWhirlWind():
+    effect = SpellEffect(screen, "whirlwindSpell.bmp", 29, 32, 2)
+    effect.set_rect(WINDOW_WIDTH + 20, random.randint(30, WINDOW_HEIGHT - 30 - SIDEBAR_HEIGHT))
+    effect.set_speed([ - 10, 0])
+    whirlwinds.add(effect)
     whirlwindSound.play()
-    for whirlwind in whirlwindsOff:
-        whirlwindsOff.remove(whirlwind)
-        whirlwind.set_rect(WINDOW_WIDTH + 20, random.randint(30, WINDOW_HEIGHT - 30 - SIDEBAR_HEIGHT))
-        whirlwinds.add(whirlwind)
 
 def castGhost():
+    for i in range(6):
+        effect = SpellEffect(screen, "ghostSpell.bmp", 32, 32, 2)
+        effect.set_rect( - 10, random.randint(30, WINDOW_HEIGHT - 30 - SIDEBAR_HEIGHT))
+        effect.set_speed([12, 0])
+        ghosts.add(effect)
     ghostSound.play()
-    for ghost in ghostsOff:
-        ghostsOff.remove(ghost)
-        ghost.set_rect( - 10, random.randint(30, WINDOW_HEIGHT - 30 - SIDEBAR_HEIGHT))
-        ghosts.add(ghost)
+
 
 # Define some colors
 BLACK      = (   0,   0,   0)
@@ -414,19 +416,7 @@ for i in range(6):
 #spells
 fireballs = pygame.sprite.Group()
 whirlwinds = pygame.sprite.Group()
-whirlwindsOff = pygame.sprite.Group()
-effect = SpellEffect(screen, "whirlwindSpell.bmp", 29, 32, 2)
-effect.set_rect(0, 0)
-effect.set_speed([ - 10, 0])
-whirlwindsOff.add(effect)
-
 ghosts = pygame.sprite.Group()
-ghostsOff = pygame.sprite.Group()
-for i in range(6):
-    effect = SpellEffect(screen, "ghostSpell.bmp", 32, 32, 2)
-    effect.set_rect(0, 0)
-    effect.set_speed([12, 0])
-    ghostsOff.add(effect)
 
 def draw():
     screen.fill(WHITE)
@@ -450,7 +440,6 @@ def draw():
         whirlwind.update(current_time)
         if whirlwind.rect.left <= 5:
             whirlwinds.remove(whirlwind)
-            whirlwindsOff.add(whirlwind)
         hits = pygame.sprite.spritecollide(whirlwind, monsters, False)
         if hits:
             for hit in hits:
@@ -461,7 +450,6 @@ def draw():
         ghost.update(current_time)
         if ghost.rect.left >= WINDOW_WIDTH - 5:
             ghosts.remove(ghost)
-            ghostsOff.add(ghost)
         hits = pygame.sprite.spritecollide(ghost, monsters, False)
         if hits:
             for hit in hits:
