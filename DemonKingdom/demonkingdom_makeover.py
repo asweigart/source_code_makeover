@@ -315,9 +315,7 @@ sidebar = Sidebar()
 #monsters
 gems = pygame.sprite.Group()
 gemTemplate = Gem(screen)
-monsters = pygame.sprite.Group()
-monsters1 = pygame.sprite.Group()
-finalWave = pygame.sprite.Group()
+
 MONSTER_STATS = {'bat':        {'image': ('bats.bmp',       30, 29, 5),  'life': 1,  'speed': 3},
                  'demon':      {'image': ('demons.bmp',     49, 68, 6),  'life': 25, 'speed': 2},
                  'demon lord': {'image': ('demonlords.bmp', 37, 42, 4),  'life': 27, 'speed': 3},
@@ -333,12 +331,57 @@ MONSTER_STATS = {'bat':        {'image': ('bats.bmp',       30, 29, 5),  'life':
                  'soul tree':  {'image': ('soultree.bmp',   69, 86, 4),  'life': 10, 'speed': 3},
                  'tablet':     {'image': ('tablets.bmp',    37, 54, 4),  'life': 15, 'speed': 3},
                  'tree':       {'image': ('trunks.bmp',     62, 65, 6),  'life': 8,  'speed': 1}}
-MONSTER_RATIOS = (('bat',) * 4 + ('plant',) * 3 + ('orc',) * 2 + ('orc2', 'slime'),
-                  ('bat',) * 2 + ('tree',) + ('plant',) * 4 + ('orc2',) * 2 + ('slime',) * 2,
-                  ('dino',) * 4 + ('orc2',) * 2 + ('ogre',) * 2 + ('plant', 'orc', 'slime'),
-                  ('bat',) * 2 + ('ogre',) * 2 + ('skeleton',) * 4 + ('orc',) * 2 + ('slime',) * 2 + ('tree', 'orc2'),
-                  ('golem', 'plant') + ('genie',) * 2 + ('orc',) * 2 + ('skeleton',) * 2,
-                  ('bat',) * 4 + ('orc2',) * 4 + ('slime',) * 6 + ('skeleton',) * 4 + ('ogre',) * 6 + ('dino',) * 2 + ('demon', 'tablet'))
+
+# MONSTER_RATIOS[n] has the ratios for level n + 1
+MONSTER_RATIOS = (('bat',) * 4 + ('plant',) * 3 + ('orc',) * 2 + ('orc2', 'slime'), # level 1
+                  ('bat',) * 2 + ('tree',) + ('plant',) * 4 + ('orc2',) * 2 + ('slime',) * 2, # level 2
+                  ('dino',) * 4 + ('orc2',) * 2 + ('ogre',) * 2 + ('plant', 'orc', 'slime'), # level 3
+                  ('bat',) * 2 + ('ogre',) * 2 + ('skeleton',) * 4 + ('orc',) * 2 + ('slime',) * 2 + ('tree', 'orc2'), # level 4
+                  ('golem', 'plant') + ('genie',) * 2 + ('orc',) * 2 + ('skeleton',) * 2, # level 5
+                  ('bat',) * 4 + ('orc2',) * 4 + ('slime',) * 6 + ('skeleton',) * 4 + ('ogre',) * 6 + ('dino',) * 2 + ('demon', 'tablet')) # level 6
+
+# FINAL_WAVE_MONSTERS[n] has the random monsters for level n + 1
+#                       'monster':    (number, min_start_x, max_start_x)
+FINAL_WAVE_MONSTERS = ({'bat':        (7,  -100, -1),  # level 1
+                        'slime':      (9,  -60,  -30),
+                        'golem':      (1,  -60,  -30)},
+                       {'bat':        (5,  -100, -1),  # level 2
+                        'plant':      (14, -70,  -20),
+                        'tree':       (18, -60,  -30),
+                        'genie':      (3,  -60,  -30)},
+                       {'dino':       (18, -80,  -10), # level 3
+                        'ogre':       (20, -60,  -30),
+                        'tablet':     (1,  -60,  -30)},
+                       {'bat':        (8,  -100, -1),  # level 4
+                        'skeleton':   (16, -100, -1),
+                        'ogre':       (18, -60,  -30),
+                        'demon':      (1,  -60,  -30),
+                        'genie':      (1,  -200, -200),
+                        'golem':      (1,  -200, -200)},
+                       {'skeleton':   (9,  -100, -1),  # level 5
+                        'demon':      (1,  -60,  -30),
+                        'soul tree':  (1,  -60,  -30)},
+                       {'bat':        (5,  -100, -1),  # level 6
+                        'skeleton':   (9,  -100, -1),
+                        'ogre':       (12, -80,  -20),
+                        'demon':      (2,  -60,  -30),
+                        'demon lord': (1,  -60,  -30)})
+
+def populateFinalWave(level):
+    spriteGroup = pygame.sprite.Group()
+    for monsterType in FINAL_WAVE_MONSTERS[level - 1]:
+        numMonsters, min_start_x, max_start_x = FINAL_WAVE_MONSTERS[level - 1][monsterType]
+        for i in range(numMonsters):
+            m = Monster(screen, *MONSTER_STATS[monsterType]["image"])
+            m.set_rect(random.randint(min_start_x, max_start_x), random.randint(25, WINDOW_HEIGHT - 85 - SIDEBAR_HEIGHT))
+            m.set_speed(MONSTER_STATS[monsterType]["speed"])
+            m.set_life(MONSTER_STATS[monsterType]["life"])
+            spriteGroup.add(m)
+    return spriteGroup
+
+monsters = pygame.sprite.Group()
+monsters1 = pygame.sprite.Group()
+finalWave1 = pygame.sprite.Group()
 
 current_time = 1
 #Level 1
@@ -349,24 +392,8 @@ for i in range(random.randint(10, 20)):
     m.set_speed(MONSTER_STATS[type]["speed"])
     m.set_life(MONSTER_STATS[type]["life"])
     monsters1.add(m)
-for i in range(10):
-    if i - 6 <= 0:
-        type = "bat"
-        min = -1
-        max = -100
-    elif i - 8 <= 0:
-        type = "slime"
-        min = -30
-        max = -60
-    elif i == 9:
-        min = -30
-        max = -60
-        type = "golem"
-    m = Monster(screen, *MONSTER_STATS[type]["image"])
-    m.set_rect(random.randint(max, min), random.randint(25, WINDOW_HEIGHT - 85 - SIDEBAR_HEIGHT))
-    m.set_speed(MONSTER_STATS[type]["speed"])
-    m.set_life(MONSTER_STATS[type]["life"])
-    finalWave.add(m)
+finalWave1 = populateFinalWave(1)
+
 #Level 2
 monsters2 = pygame.sprite.Group()
 finalWave2 = pygame.sprite.Group()
@@ -377,28 +404,8 @@ for i in range(random.randint(35, 40)):
     m.set_speed(MONSTER_STATS[type]["speed"])
     m.set_life(MONSTER_STATS[type]["life"])
     monsters2.add(m)
-for i in range(21):
-    if i - 4 <= 0:
-        type = "bat"
-        min = -1
-        max = -100
-    elif i - 13 <= 0:
-        type = "plant"
-        min = -20
-        max = -70
-    elif i - 17 <= 0:
-        min = -30
-        max = -60
-        type = "tree"
-    elif i >= 18:
-        type = "genie"
-        min = -30
-        max = -60
-    m = Monster(screen, *MONSTER_STATS[type]["image"])
-    m.set_rect(random.randint(max, min), random.randint(25, WINDOW_HEIGHT - 85 - SIDEBAR_HEIGHT))
-    m.set_speed(MONSTER_STATS[type]["speed"])
-    m.set_life(MONSTER_STATS[type]["life"])
-    finalWave2.add(m)
+finalWave2 = populateFinalWave(2)
+
 #Level 3
 monsters3 = pygame.sprite.Group()
 finalWave3 = pygame.sprite.Group()
@@ -409,24 +416,8 @@ for i in range(random.randint(25, 30)):
     m.set_speed(MONSTER_STATS[type]["speed"])
     m.set_life(MONSTER_STATS[type]["life"])
     monsters3.add(m)
-for i in range(21):
-    if i - 17 <= 0:
-        type = "dino"
-        min = -10
-        max = -80
-    elif i - 19 <= 0:
-        min = -30
-        max = -60
-        type = "ogre"
-    elif i == 20:
-        type = "tablet"
-        min = -30
-        max = -60
-    m = Monster(screen, *MONSTER_STATS[type]["image"])
-    m.set_rect(random.randint(max, min), random.randint(25, WINDOW_HEIGHT - 85 - SIDEBAR_HEIGHT))
-    m.set_speed(MONSTER_STATS[type]["speed"])
-    m.set_life(MONSTER_STATS[type]["life"])
-    finalWave3.add(m)
+finalWave3 = populateFinalWave(3)
+
 #Level 4
 monsters4 = pygame.sprite.Group()
 finalWave4 = pygame.sprite.Group()
@@ -437,36 +428,8 @@ for i in range(random.randint(45, 65)):
     m.set_speed(MONSTER_STATS[type]["speed"])
     m.set_life(MONSTER_STATS[type]["life"])
     monsters4.add(m)
-for i in range(21):
-    if i - 7 <= 0:
-        type = "bat"
-        min = -1
-        max = -100
-    elif i - 15 <= 0:
-        type = "skeleton"
-        min = -1
-        max = -100
-    elif i - 17 <= 0:
-        min = -30
-        max = -60
-        type = "ogre"
-    elif i == 18:
-        type = "demon"
-        min = -30
-        max = -60
-    elif i == 19:
-        type = "genie"
-        min = -200
-        max  = -200
-    elif i == 20:
-        type = "golem"
-        min = -200
-        max = -200
-    m = Monster(screen, *MONSTER_STATS[type]["image"])
-    m.set_rect(random.randint(max, min), random.randint(25, WINDOW_HEIGHT - 85 - SIDEBAR_HEIGHT))
-    m.set_speed(MONSTER_STATS[type]["speed"])
-    m.set_life(MONSTER_STATS[type]["life"])
-    finalWave4.add(m)
+finalWave4 = populateFinalWave(4)
+
 #Level 5
 monsters5 = pygame.sprite.Group()
 finalWave5 = pygame.sprite.Group()
@@ -477,24 +440,8 @@ for i in range(random.randint(12, 16)):
     m.set_speed(MONSTER_STATS[type]["speed"])
     m.set_life(MONSTER_STATS[type]["life"])
     monsters5.add(m)
-for i in range(12):
-    if i - 8 <= 0:
-        type = "skeleton"
-        min = -1
-        max = -100
-    elif i == 9 or i == 10:
-        type = "demon"
-        min = -30
-        max = -60
-    elif i == 11:
-        type = "soul tree"
-        min = -30
-        max = -60
-    m = Monster(screen, *MONSTER_STATS[type]["image"])
-    m.set_rect(random.randint(max, min), random.randint(25, WINDOW_HEIGHT - 85 - SIDEBAR_HEIGHT))
-    m.set_speed(MONSTER_STATS[type]["speed"])
-    m.set_life(MONSTER_STATS[type]["life"])
-    finalWave5.add(m)
+finalWave5 = populateFinalWave(5)
+
 #Level 6
 monsters6 = pygame.sprite.Group()
 finalWave6 = pygame.sprite.Group()
@@ -505,32 +452,7 @@ for i in range(random.randint(38, 43)):
     m.set_speed(MONSTER_STATS[type]["speed"])
     m.set_life(MONSTER_STATS[type]["life"])
     monsters6.add(m)
-for i in range(15):
-    if i - 4 <= 0:
-        type = "bat"
-        min = -1
-        max = -100
-    elif i - 8 <= 0:
-        type = "skeleton"
-        min = -1
-        max = -100
-    elif i - 11 <= 0:
-        type = "ogre"
-        min = -20
-        max = -80
-    elif i == 12 or i == 13:
-        type = "demon"
-        min = -30
-        max = -60
-    elif i == 14:
-        type = "demon lord"
-        min = -30
-        max = -60
-    m = Monster(screen, *MONSTER_STATS[type]["image"])
-    m.set_rect(random.randint(max, min), random.randint(25, WINDOW_HEIGHT - 85 - SIDEBAR_HEIGHT))
-    m.set_speed(MONSTER_STATS[type]["speed"])
-    m.set_life(MONSTER_STATS[type]["life"])
-    finalWave6.add(m)
+finalWave6 = populateFinalWave(6)
 
 #spells
 fireballs = pygame.sprite.Group()
@@ -677,7 +599,7 @@ while not done and not gameover:
                 screen.blit(finalWaveText, [10, 10])
                 pygame.display.flip()
                 pygame.time.delay(1750)
-                monsters = finalWave
+                monsters = finalWave1
             else:
                 finalWaveDone = False
                 level += 1
