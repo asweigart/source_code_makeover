@@ -303,7 +303,7 @@ whirlwindSound = pygame.mixer.Sound("sounds/whirlwind.wav")
 ghostSound     = pygame.mixer.Sound("sounds/ghost.wav")
 getGemSound    = pygame.mixer.Sound("sounds/pickupGem.wav")
 
-numGems = 0
+numGems = 999999990
 
 #background
 background = Background(('background1.png',
@@ -497,6 +497,7 @@ pygame.time.delay(1750)
 monsters = randomMonsters[0]
 # - - -- - --- Main Program Loop - - -- - -- - ---
 while not done and not gameover:
+    castFireBall()
     for event in pygame.event.get():
 
         if event.type == pygame.QUIT:
@@ -574,13 +575,14 @@ while not done and not gameover:
                     clock.tick(20)
                 gameover = True
                 youwin = True
+                break
 
             finalWaveDone = False
             level += 1
             gems = pygame.sprite.Group()
             background.changeBackground(level - 1)
             draw()
-            screen.blit(levelText[1], [10, 10])
+            screen.blit(levelText[level - 1], [10, 10])
             pygame.display.flip()
             pygame.time.delay(1750)
             monsters = randomMonsters[level - 1]
