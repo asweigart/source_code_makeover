@@ -303,7 +303,7 @@ whirlwindSound = pygame.mixer.Sound("sounds/whirlwind.wav")
 ghostSound     = pygame.mixer.Sound("sounds/ghost.wav")
 getGemSound    = pygame.mixer.Sound("sounds/pickupGem.wav")
 
-numGems = 999999990
+numGems = 0
 
 #background
 background = Background(('background1.png',
@@ -497,9 +497,7 @@ pygame.time.delay(1750)
 monsters = randomMonsters[0]
 # - - -- - --- Main Program Loop - - -- - -- - ---
 while not done and not gameover:
-    castFireBall()
     for event in pygame.event.get():
-
         if event.type == pygame.QUIT:
             done=True
 
